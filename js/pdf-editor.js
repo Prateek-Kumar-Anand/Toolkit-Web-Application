@@ -2,7 +2,8 @@
    MODULE 2: PDF EDITOR
    Client-side page-level PDF editing using pdf-lib (editing/export)
    and pdf.js (thumbnail rendering).
-   Supports: rotate, delete, reorder, merge, selective extract, watermark.
+   Supports: rotate, delete, reorder, merge, add image as a page,
+   selective extract, watermark.
    ============================================================ */
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -29,6 +30,17 @@ document.getElementById('pdfMergeInput').addEventListener('change', async (e) =>
   const file = e.target.files[0];
   if(!file) return;
   await loadPdfIntoWorkingSet(file);
+  renderPdfGrid();
+  e.target.value = '';
+});
+
+document.getElementById('imageAddInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  await loadImageIntoWorkingSet(file);
+  document.getElementById('mergeBtn').disabled = false;
+  document.getElementById('pdfDownloadBtn').disabled = false;
+  document.getElementById('pdfEmptyState').style.display = 'none';
   renderPdfGrid();
   e.target.value = '';
 });
@@ -60,6 +72,80 @@ async function loadPdfIntoWorkingSet(file){
     });
   }
   setStatus(workingPages.length + ' page(s) loaded across ' + Object.keys(sourceDocs).length + ' file(s).');
+}
+
+async function loadImageIntoWorkingSet(file){
+  setStatus('Adding image ' + file.name + '...');
+  try{
+    const isPng = file.type === 'image/png' || /\.png$/i.test(file.name);
+    const isJpg = file.type === 'image/jpeg' || /\.(jpe?g)$/i.test(file.name);
+    if(!isPng && !isJpg){
+      alert('Only PNG and JPEG images can be added as a page.');
+      setStatus(workingPages.length + ' page(s) loaded across ' + Object.keys(sourceDocs).length + ' file(s).');
+      return;
+    }
+
+    const arrayBuffer = await file.arrayBuffer();
+
+    // Match the page size already in use so the new page blends in with the
+    // rest of the document; fall back to standard A4 (in points) if this is
+    // the very first thing added to the working set.
+    let pageWidth = 595.28, pageHeight = 841.89;
+    if(workingPages.length > 0){
+      const first = workingPages[0];
+      const size = sourceDocs[first.sourceId].pdfLibDoc.getPage(first.srcPageIndex).getSize();
+      pageWidth = size.width;
+      pageHeight = size.height;
+    }
+
+    const imageDoc = await PDFLib.PDFDocument.create();
+    const embedded = isPng ? await imageDoc.embedPng(arrayBuffer) : await imageDoc.embedJpg(arrayBuffer);
+    const page = imageDoc.addPage([pageWidth, pageHeight]);
+
+    // Fit the image inside the page with a small margin, centered, preserving
+    // its aspect ratio (never stretched/distorted).
+    const margin = 36; // 0.5in
+    const maxW = pageWidth - margin * 2;
+    const maxH = pageHeight - margin * 2;
+    const ratio = embedded.width / embedded.height;
+    let drawW = maxW, drawH = maxW / ratio;
+    if(drawH > maxH){ drawH = maxH; drawW = maxH * ratio; }
+    page.drawImage(embedded, {
+      x: (pageWidth - drawW) / 2,
+      y: (pageHeight - drawH) / 2,
+      width: drawW,
+      height: drawH
+    });
+
+    const sourceId = 'src' + (srcCounter++);
+    sourceDocs[sourceId] = { pdfLibDoc: imageDoc };
+
+    // Render the thumbnail through the same pdf.js pipeline used for opened
+    // PDFs, so this page looks/behaves identically (rotation, sizing, etc.)
+    const imageDocBytes = await imageDoc.save();
+    const pdfjsDoc = await pdfjsLib.getDocument({ data: imageDocBytes }).promise;
+    const pdfjsPage = await pdfjsDoc.getPage(1);
+    const viewport = pdfjsPage.getViewport({ scale: 0.4 });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await pdfjsPage.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+
+    workingPages.push({
+      key: 'p' + (pageKeyCounter++),
+      sourceId,
+      srcPageIndex: 0,
+      rotation: 0,
+      include: true,
+      thumb: canvas.toDataURL('image/png')
+    });
+
+    setStatus(workingPages.length + ' page(s) loaded across ' + Object.keys(sourceDocs).length + ' file(s). Image added as a new page.');
+  } catch(e){
+    alert('Could not add that image: ' + e.message);
+    console.error(e);
+    setStatus(workingPages.length + ' page(s) loaded across ' + Object.keys(sourceDocs).length + ' file(s).');
+  }
 }
 
 function renderPdfGrid(){

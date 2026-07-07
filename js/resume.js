@@ -2,6 +2,9 @@
    MODULE 1: RESUME BUILDER
    Renders a live preview matching a fixed two-column CV layout
    and exports it to PDF using html2canvas + jsPDF.
+   The preview always fits on a single A4 page: content taller than
+   one page is auto-scaled down (see fitResumeToOnePage) rather than
+   spilling onto a second page.
    ============================================================ */
 let counter = 0;
 function uid(){ return 'id' + (counter++); }
@@ -109,6 +112,36 @@ function renderResume(){
     `;
     projOut.appendChild(div);
   });
+
+  fitResumeToOnePage();
+}
+
+/* ------------------------------------------------------------
+   ONE-PAGE AUTO-FIT
+   #resume lives inside a fixed 794x1123px window (#resume-frame,
+   the exact pixel size of an A4 page at 96dpi). If the real content
+   is taller than that, we shrink #resume with a CSS transform so it
+   always lands exactly on one page - both in the live preview and
+   in the exported PDF (see the downloadBtn click handler below).
+   ------------------------------------------------------------ */
+const RESUME_PAGE_W = 794;
+const RESUME_PAGE_H = 1123;
+
+function fitResumeToOnePage(){
+  const resumeEl = document.getElementById('resume');
+  // Reset first so scrollHeight reflects the true, unscaled content height.
+  resumeEl.style.transform = 'none';
+  const naturalHeight = resumeEl.scrollHeight;
+  const scale = naturalHeight > RESUME_PAGE_H ? RESUME_PAGE_H / naturalHeight : 1;
+  resumeEl.style.transform = scale < 1 ? `scale(${scale})` : 'none';
+
+  const note = document.getElementById('pageFitNote');
+  if(note){
+    note.textContent = scale < 1
+      ? 'Content auto-shrunk slightly to keep this to one page.'
+      : '';
+  }
+  return scale;
 }
 
 function fillList(containerId, targetId){
@@ -149,7 +182,10 @@ document.getElementById('downloadBtn').addEventListener('click', async function(
   btn.disabled = true;
   btn.textContent = 'Generating PDF...';
   try{
-    const resumeEl = document.getElementById('resume');
+    const frameEl = document.getElementById('resume-frame');
+
+    // Re-run the fit right before capture (covers any last-keystroke edit).
+    fitResumeToOnePage();
 
     // Make sure the custom webfonts (Lora / Source Sans 3) are fully loaded
     // before rasterizing — otherwise html2canvas can capture a fallback
@@ -160,30 +196,26 @@ document.getElementById('downloadBtn').addEventListener('click', async function(
     // Small extra delay to let the browser finish painting after font swap.
     await new Promise(resolve => setTimeout(resolve, 150));
 
-    const canvas = await html2canvas(resumeEl, {
+    // Capture the fixed 794x1123 frame (not the free-floating #resume element).
+    // Because #resume is scaled to fit inside it, this canvas is always
+    // exactly one A4 page's worth of pixels — no matter how much content
+    // the person has added.
+    const canvas = await html2canvas(frameEl, {
       scale: 2,
       useCORS: true,
       backgroundColor: '#ffffff',
       logging: false,
-      windowWidth: resumeEl.scrollWidth,
-      windowHeight: resumeEl.scrollHeight
+      width: RESUME_PAGE_W,
+      height: RESUME_PAGE_H,
+      windowWidth: RESUME_PAGE_W,
+      windowHeight: RESUME_PAGE_H
     });
     const imgData = canvas.toDataURL('image/png');
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = 210, pageHeight = 297;
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
-    let position = 0;
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
+    // The frame's pixel ratio (794x1123) already matches A4's mm ratio
+    // (210x297), so a single full-bleed image always fills exactly one page.
+    pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
     const name = val('f-name') || 'resume';
     pdf.save(name.replace(/\s+/g,'_') + '_CV.pdf');
   } catch(e){

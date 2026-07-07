@@ -93,7 +93,7 @@ button{ font-family:inherit; }
 }
 .card-grid{
   display:grid;
-  grid-template-columns:repeat(3, minmax(0,1fr));
+  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
   gap:24px;
   width:100%;
   max-width:980px;
@@ -195,9 +195,14 @@ textarea{min-height:60px;}
 }
 #downloadBtn:hover{filter:brightness(0.95);}
 #downloadBtn:disabled{opacity:.6; cursor:wait;}
-.preview-panel{ padding:32px; display:flex; flex-direction:column; align-items:center; overflow-y:auto; max-height:calc(100vh - 58px); }
-.page-shadow{ box-shadow:0 4px 24px rgba(0,0,0,0.15); margin-bottom:20px; }
-#resume{ width:794px; min-height:1123px; background:#fff; display:flex; align-items:stretch; }
+.preview-panel{ padding:32px; display:flex; flex-direction:column; align-items:center; overflow:auto; max-height:calc(100vh - 58px); }
+.page-shadow{ box-shadow:0 4px 24px rgba(0,0,0,0.15); margin-bottom:12px; flex:0 0 auto; }
+/* Fixed A4-ratio window (794x1123px = 210x297mm @96dpi). Content taller than
+   this is auto-scaled down (see fitResumeToOnePage in resume.js) so the
+   live preview - and the exported PDF - is always exactly one page. */
+.page-frame{ width:794px; height:1123px; overflow:hidden; position:relative; background:#fff; }
+#resume{ width:794px; min-height:1123px; background:#fff; display:flex; align-items:stretch; position:absolute; top:0; left:0; transform-origin:top left; }
+.page-fit-note{ font-size:12px; color:#8a8a8a; text-align:center; max-width:794px; }
 .sidebar{ background:var(--teal); color:#eef3f1; padding:34px 24px; flex:0 0 270px; width:270px; }
 .sidebar .name{ font-family:'Lora',serif; font-size:26px; font-weight:700; line-height:1.15; margin:0 0 6px; }
 .sidebar .title{ font-size:12.5px; color:#cfe0dc; margin:0 0 18px; line-height:1.4; }
@@ -298,13 +303,45 @@ textarea{min-height:60px;}
 }
 .pdf-status{ font-size:12px; color:#777; margin-bottom:14px; }
 
+/* ================= ZIP TOOL TAB ================= */
+.zip-list{
+  background:#fff; border:1px solid var(--line); border-radius:10px;
+  overflow:hidden;
+}
+.zip-row{
+  display:flex; align-items:center; gap:12px;
+  padding:10px 14px; border-bottom:1px solid var(--line);
+}
+.zip-row:last-child{ border-bottom:none; }
+.zip-row:hover{ background:#faf9f6; }
+.zip-row.is-dir{ color:#999; }
+.zip-row .zip-check{ width:16px; height:16px; flex:0 0 auto; }
+.zip-row .zip-icon{ font-size:16px; flex:0 0 auto; width:20px; text-align:center; }
+.zip-row .zip-name{
+  flex:1 1 auto; min-width:0; font-size:13.5px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.zip-row .zip-path{ color:#999; font-weight:400; }
+.zip-row .zip-size{
+  flex:0 0 auto; font-size:12px; color:#888; min-width:64px; text-align:right;
+}
+.zip-row .zip-dl{
+  flex:0 0 auto; background:#f0efe9; border:1px solid var(--line); border-radius:4px;
+  font-size:11px; padding:4px 8px; cursor:pointer;
+}
+.zip-row .zip-dl:hover{ background:#e5e2d9; }
+.zip-row .zip-dl:disabled{ opacity:.4; cursor:not-allowed; }
+
 /* ================= RESPONSIVE ================= */
 @media (max-width: 900px){
   .card-grid{ grid-template-columns:1fr; max-width:420px; }
   .hero h1{ font-size:32px; }
   .app{ grid-template-columns:1fr; }
   .form-panel, .preview-panel{ max-height:none; }
-  #resume{ width:100%; min-width:0; }
+  /* The page-frame is a fixed 794x1123 A4-ratio box (needed so exports are
+     always exactly one page) - on narrow screens let it scroll horizontally
+     instead of squashing the layout. */
+  .preview-panel{ overflow-x:auto; align-items:flex-start; }
   .topbar{ flex-direction:column; align-items:flex-start; gap:8px; }
 }
 @media (max-width: 480px){

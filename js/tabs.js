@@ -1,7 +1,7 @@
 /* ============================================================
    VIEW SWITCHING
-   Four views total: home, resume, pdf, excel.
-   Home shows the 3 big tool cards. Once inside a tool, a slim
+   Five views total: home, resume, pdf, excel, zip.
+   Home shows the big tool cards. Once inside a tool, a slim
    top bar appears with a Home link and quick tab switches.
    ============================================================ */
 function showView(viewName){

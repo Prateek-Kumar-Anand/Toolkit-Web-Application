@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Toolkit — Resume, PDF & Excel</title>
-<meta name="description" content="Build a formatted resume, edit PDFs, and clean Excel files — all in your browser, no backend required.">
+<title>Student Toolkit — Resume, PDF, Excel & Zip</title>
+<meta name="description" content="Build a formatted resume, edit PDFs, clean Excel files, and unzip archives — all in your browser, no backend required.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -17,6 +17,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
 
@@ -27,6 +28,7 @@
     <button class="tab-btn" data-view="resume" onclick="showView('resume')">📄 CV Creation</button>
     <button class="tab-btn" data-view="pdf" onclick="showView('pdf')">🛠 PDF Editing</button>
     <button class="tab-btn" data-view="excel" onclick="showView('excel')">📊 Excel Cleaning</button>
+    <button class="tab-btn" data-view="zip" onclick="showView('zip')">🗜 .zip operation</button>
   </div>
 </div>
 
@@ -35,7 +37,7 @@
   <div class="hero">
     <div class="hero-eyebrow">Free & runs entirely in your browser</div>
     <h1>Student Toolkit</h1>
-    <p class="hero-sub">Three tools college students actually need — build a resume, edit a PDF, and clean up a spreadsheet. No sign-up, no uploads to a server, nothing to install.</p>
+    <p class="hero-sub">Four tools college students actually need — build a resume, edit a PDF, clean up a spreadsheet, and unzip an archive. No sign-up, no uploads to a server, nothing to install.</p>
   </div>
 
   <div class="card-grid">
@@ -58,6 +60,13 @@
       <div class="tool-name">Excel Cleaning</div>
       <div class="tool-desc">Tidy up a messy spreadsheet — blank rows, stray spaces, inconsistent headers.</div>
       <div class="tool-cta">Clean a sheet →</div>
+    </button>
+
+    <button class="tool-card" onclick="showView('zip')">
+      <div class="tool-icon">🗜</div>
+      <div class="tool-name">.zip operation</div>
+      <div class="tool-desc">Unzip an archive right in your browser, preview what's inside, and download only the files you pick.</div>
+      <div class="tool-cta">Open a .zip →</div>
     </button>
   </div>
 
@@ -132,6 +141,7 @@
 
     <div class="preview-panel">
       <div class="page-shadow">
+        <div class="page-frame" id="resume-frame">
         <div id="resume">
           <div class="sidebar">
             <div class="name" id="p-name">Your Name</div>
@@ -167,7 +177,9 @@
             <div class="block"><h3>Research & Projects</h3><div id="p-projects"></div></div>
           </div>
         </div>
+        </div>
       </div>
+      <div class="page-fit-note" id="pageFitNote"></div>
     </div>
   </div>
 </div>
@@ -176,7 +188,7 @@
 <div class="view" id="view-pdf">
   <div class="pdf-wrap">
     <h1 class="tool-heading">PDF Editor</h1>
-    <p class="tool-subheading">Open a PDF, then rotate, delete, reorder, merge, or watermark its pages.</p>
+    <p class="tool-subheading">Open a PDF, then rotate, delete, reorder, merge, add images as pages, or watermark its pages.</p>
 
     <div class="pdf-toolbar">
       <div class="grp">
@@ -188,14 +200,18 @@
         <button class="file-btn secondary" id="mergeBtn" onclick="document.getElementById('pdfMergeInput').click()" disabled>+ Merge Another PDF</button>
       </div>
       <div class="grp">
+        <input type="file" id="imageAddInput" accept="image/png,image/jpeg" style="display:none">
+        <button class="file-btn secondary" id="addImageBtn" onclick="document.getElementById('imageAddInput').click()">+ Add Image</button>
+      </div>
+      <div class="grp">
         <input type="text" id="watermarkText" placeholder="Watermark text (optional)">
       </div>
       <button id="pdfDownloadBtn" disabled onclick="downloadEditedPdf()">Download Edited PDF</button>
     </div>
     <div class="pdf-status" id="pdfStatus"></div>
     <div id="pdfEmptyState" class="pdf-empty">
-      No PDF loaded yet. Click <strong>Open PDF</strong> to get started.<br>
-      Once loaded you can rotate, delete, reorder, extract pages, merge in another PDF, and add a watermark.
+      No PDF loaded yet. Click <strong>Open PDF</strong> to get started — or click <strong>+ Add Image</strong> to start a new PDF from a photo/scan.<br>
+      Once loaded you can rotate, delete, reorder, extract pages, merge in another PDF, add images as new pages, and add a watermark.
     </div>
     <div class="pdf-grid" id="pdfGrid"></div>
   </div>
@@ -213,9 +229,38 @@
   </div>
 </div>
 
+<!-- ================= TOOL 4: .ZIP OPERATION ================= -->
+<div class="view" id="view-zip">
+  <div class="pdf-wrap">
+    <h1 class="tool-heading">.zip operation</h1>
+    <p class="tool-subheading">Open a .zip archive, preview everything inside, then download only the files you need — one at a time or bundled back into a new .zip.</p>
+
+    <div class="pdf-toolbar">
+      <div class="grp">
+        <input type="file" id="zipOpenInput" accept=".zip,application/zip,application/x-zip-compressed" style="display:none">
+        <button class="file-btn" onclick="document.getElementById('zipOpenInput').click()">Open .zip</button>
+      </div>
+      <div class="grp">
+        <button class="file-btn secondary" id="zipSelectAllBtn" onclick="zipToggleSelectAll()" disabled>Select All</button>
+      </div>
+      <div class="grp">
+        <input type="text" id="zipFilterInput" placeholder="Filter files by name..." oninput="renderZipList()" disabled>
+      </div>
+      <button id="zipDownloadBtn" disabled onclick="downloadSelectedZipEntries()">Download Selected</button>
+    </div>
+    <div class="pdf-status" id="zipStatus"></div>
+    <div id="zipEmptyState" class="pdf-empty">
+      No .zip loaded yet. Click <strong>Open .zip</strong> to get started.<br>
+      Once loaded you can tick the files you want and download them — a single file downloads as-is, multiple files are bundled into a new .zip.
+    </div>
+    <div class="zip-list" id="zipList"></div>
+  </div>
+</div>
+
 <script src="js/tabs.js"></script>
 <script src="js/resume.js"></script>
 <script src="js/pdf-editor.js"></script>
 <script src="js/excel-cleaner.js"></script>
+<script src="js/zip-tool.js"></script>
 </body>
 </html>
