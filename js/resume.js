@@ -62,10 +62,10 @@ function addProject(data){
 function renderResume(){
   document.getElementById('p-name').textContent = val('f-name') || 'Your Name';
   document.getElementById('p-title').textContent = val('f-title') || 'Your Title / Subtitle';
-  document.getElementById('p-email').textContent = '✉ ' + (val('f-email') || 'email@example.com');
-  document.getElementById('p-phone').textContent = '☎ ' + (val('f-phone') || 'phone number');
-  document.getElementById('p-location').textContent = '📍 ' + (val('f-location') || 'Location');
-  document.getElementById('p-university').textContent = '🎓 ' + (val('f-university') || 'University');
+  document.getElementById('p-email').textContent = val('f-email') || 'email@example.com';
+  document.getElementById('p-phone').textContent = val('f-phone') || 'phone number';
+  document.getElementById('p-location').textContent = val('f-location') || 'Location';
+  document.getElementById('p-university').textContent = val('f-university') || 'University';
   document.getElementById('p-research-focus').textContent = val('f-research-focus');
   document.getElementById('p-profile').textContent = val('f-profile');
 
@@ -150,7 +150,24 @@ document.getElementById('downloadBtn').addEventListener('click', async function(
   btn.textContent = 'Generating PDF...';
   try{
     const resumeEl = document.getElementById('resume');
-    const canvas = await html2canvas(resumeEl, { scale: 2, useCORS: true });
+
+    // Make sure the custom webfonts (Lora / Source Sans 3) are fully loaded
+    // before rasterizing — otherwise html2canvas can capture a fallback
+    // system font mid-swap, which is a common cause of a "broken looking" export.
+    if (document.fonts && document.fonts.ready) {
+      await document.fonts.ready;
+    }
+    // Small extra delay to let the browser finish painting after font swap.
+    await new Promise(resolve => setTimeout(resolve, 150));
+
+    const canvas = await html2canvas(resumeEl, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      windowWidth: resumeEl.scrollWidth,
+      windowHeight: resumeEl.scrollHeight
+    });
     const imgData = canvas.toDataURL('image/png');
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
