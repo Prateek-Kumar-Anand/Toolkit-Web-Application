@@ -187,9 +187,11 @@ textarea{min-height:60px;}
 .list-item .rm{ position:absolute; top:6px; right:8px; background:none; border:none; color:#b33; cursor:pointer; font-size:12px; font-weight:600; }
 .add-btn{ margin-top:4px; background:var(--teal); color:#fff; border:none; padding:7px 12px; border-radius:5px; font-size:12px; cursor:pointer; }
 .add-btn:hover{background:var(--teal-dark);}
-.simple-line{display:flex; gap:6px; margin-bottom:6px;}
-.simple-line input{flex:1;}
-.simple-line .rm{ background:none;border:1px solid #d7d3c8;border-radius:5px; color:#b33; cursor:pointer; font-size:12px; padding:0 8px; }
+.simple-line{display:flex; gap:6px; margin-bottom:6px; align-items:center;}
+.simple-line input[type=text]{flex:1;}
+.simple-line input[type=range]{ flex:0 0 76px; width:76px; accent-color:var(--teal); }
+.simple-line .level-badge{ flex:0 0 32px; width:32px; font-size:11px; color:#777; text-align:right; }
+.simple-line .rm{ background:none;border:1px solid #d7d3c8;border-radius:5px; color:#b33; cursor:pointer; font-size:12px; padding:0 8px; flex:0 0 auto; }
 #downloadBtn{
   position:sticky; bottom:0; width:100%; padding:13px; background:var(--gold); color:#25231a;
   border:none; border-radius:7px; font-size:15px; font-weight:700; cursor:pointer; margin-top:10px;

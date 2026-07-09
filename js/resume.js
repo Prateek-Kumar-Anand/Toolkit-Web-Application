@@ -80,13 +80,32 @@ const SIMPLE_PLACEHOLDERS = {
   interest: 'e.g. Reading'
 };
 
-function addSimpleLine(containerId, placeholderKind, value){
+function addSimpleLine(containerId, placeholderKind, value, level){
   const container = document.getElementById(containerId);
   const wrap = document.createElement('div');
   wrap.className = 'simple-line';
   const ph = SIMPLE_PLACEHOLDERS[placeholderKind] || 'Enter a value';
+
+  let sliderHtml = '';
+  if(placeholderKind === 'skill'){
+    const lvl = (level === undefined || level === null) ? 70 : level;
+    sliderHtml = `
+      <input type="range" class="level-slider" min="0" max="100" step="5" value="${lvl}"
+        title="Bar length in the Student Blue template" oninput="this.nextElementSibling.textContent=this.value+'%'; renderResume();">
+      <span class="level-badge">${lvl}%</span>
+    `;
+  } else if(placeholderKind === 'language'){
+    const lvl = (level === undefined || level === null) ? 3 : level;
+    sliderHtml = `
+      <input type="range" class="level-slider" min="0" max="5" step="1" value="${lvl}"
+        title="Dots filled in the Student Blue template" oninput="this.nextElementSibling.textContent=this.value+'/5'; renderResume();">
+      <span class="level-badge">${lvl}/5</span>
+    `;
+  }
+
   wrap.innerHTML = `
     <input type="text" placeholder="${ph}" value="${value ? value.replace(/"/g,'&quot;') : ''}" oninput="renderResume()">
+    ${sliderHtml}
     <button class="rm" onclick="this.parentElement.remove(); renderResume();">✕</button>
   `;
   container.appendChild(wrap);
@@ -197,9 +216,19 @@ function escapeHtml(str){
   return d.innerHTML;
 }
 function simpleLineValues(containerId){
-  return Array.from(document.querySelectorAll('#'+containerId+' input'))
+  return Array.from(document.querySelectorAll('#'+containerId+' input[type=text]'))
     .map(inp => inp.value.trim())
     .filter(Boolean);
+}
+function simpleLineEntries(containerId){
+  return Array.from(document.querySelectorAll('#'+containerId+' .simple-line')).map(row=>{
+    const textInp = row.querySelector('input[type=text]');
+    const rangeInp = row.querySelector('input[type=range]');
+    return {
+      text: textInp ? textInp.value.trim() : '',
+      level: rangeInp ? parseInt(rangeInp.value, 10) : null
+    };
+  }).filter(e => e.text);
 }
 function fillListInto(containerId, targetEl){
   targetEl.innerHTML = '';
@@ -377,12 +406,12 @@ function renderStudent(){
 
   const skillsOut = document.getElementById('s-skills');
   skillsOut.innerHTML = '';
-  simpleLineValues('skills-container').forEach((sk,i)=>{
-    const pct = 55 + ((i * 11) % 40);
+  simpleLineEntries('skills-container').forEach(entry=>{
+    const pct = entry.level !== null && !isNaN(entry.level) ? entry.level : 70;
     const row = document.createElement('div');
     row.className = 'stu-skill-row';
     row.innerHTML = `
-      <div class="stu-skill-name">${escapeHtml(sk)}</div>
+      <div class="stu-skill-name">${escapeHtml(entry.text)}</div>
       <div class="stu-skill-bar"><div class="stu-skill-fill" style="width:${pct}%"></div></div>
     `;
     skillsOut.appendChild(row);
@@ -390,13 +419,13 @@ function renderStudent(){
 
   const langOut = document.getElementById('s-languages');
   langOut.innerHTML = '';
-  simpleLineValues('languages-container').forEach((lang,i)=>{
-    const filled = 2 + (i % 4);
+  simpleLineEntries('languages-container').forEach(entry=>{
+    const filled = entry.level !== null && !isNaN(entry.level) ? entry.level : 3;
     let dots = '';
     for(let d=0; d<5; d++) dots += `<span class="stu-dot ${d < filled ? 'filled' : ''}"></span>`;
     const row = document.createElement('div');
     row.className = 'stu-lang-row';
-    row.innerHTML = `<div class="stu-lang-name">${escapeHtml(lang)}</div><div class="stu-dots">${dots}</div>`;
+    row.innerHTML = `<div class="stu-lang-name">${escapeHtml(entry.text)}</div><div class="stu-dots">${dots}</div>`;
     langOut.appendChild(row);
   });
 
@@ -507,9 +536,9 @@ function fitResumeToOnePage(){
   });
 
 function seedExample(){
-  ['Molecular Biology Techniques','Microbiology & Cell Culture','Analytical Techniques','Bioinformatics & Software','PCR & Cell Culture','Plant Pathology & Virology']
-    .forEach(s => addSimpleLine('skills-container','skill', s));
-  ['English','Hindi'].forEach(l => addSimpleLine('languages-container','language', l));
+  [['Molecular Biology Techniques',90],['Microbiology & Cell Culture',80],['Analytical Techniques',70],['Bioinformatics & Software',95],['PCR & Cell Culture',75],['Plant Pathology & Virology',65]]
+    .forEach(s => addSimpleLine('skills-container','skill', s[0], s[1]));
+  [['English',5],['Hindi',4]].forEach(l => addSimpleLine('languages-container','language', l[0], l[1]));
   ['MS Office','Basic knowledge: Adobe Photoshop'].forEach(c => addSimpleLine('computerskills-container','computer', c));
   ['Reading','Travelling'].forEach(i => addSimpleLine('interests-container','interest', i));
   addSimpleLine('certifications-container','certification', "Database Management System — St. Andrew's College, 2019–2020");
