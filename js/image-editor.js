@@ -71,6 +71,7 @@ function showImgEditorUI(){
   document.getElementById('imgEditorLayout').style.display = 'grid';
   document.getElementById('imgDownloadBtn').disabled = false;
   document.getElementById('imgResetBtn').disabled = false;
+  imgCanvas.classList.add('no-crop');
 }
 
 /* ---------------- Canvas <-> visible sync ---------------- */
@@ -332,6 +333,7 @@ function imgCancelCrop(){
   cropStart = null;
   cropCurrent = null;
   imgCropBox.style.display = 'none';
+  imgCanvas.classList.add('no-crop');
   document.getElementById('imgCropHint').style.display = 'none';
   document.getElementById('imgCropStartBtn').disabled = false;
   document.getElementById('imgCropCancelBtn').disabled = true;
@@ -340,8 +342,19 @@ function imgCancelCrop(){
 
 function wrapPoint(e){
   const rect = imgCanvasWrap.getBoundingClientRect();
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  let clientX, clientY;
+  if(e.changedTouches && e.changedTouches.length){
+    // touchend/touchcancel: the finger that lifted is only in changedTouches,
+    // e.touches for it has already been emptied out by the browser.
+    clientX = e.changedTouches[0].clientX;
+    clientY = e.changedTouches[0].clientY;
+  } else if(e.touches && e.touches.length){
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  } else {
+    clientX = e.clientX;
+    clientY = e.clientY;
+  }
   let x = clientX - rect.left;
   let y = clientY - rect.top;
   x = Math.max(0, Math.min(x, rect.width));
