@@ -1,6 +1,6 @@
 /* ============================================================
    VIEW SWITCHING
-   Five views total: home, resume, pdf, excel, zip.
+   Seven views total: home, resume, pdf, excel, zip, image, convert.
    Home shows the big tool cards. Once inside a tool, a slim
    top bar appears with a Home link and quick tab switches.
    ============================================================ */

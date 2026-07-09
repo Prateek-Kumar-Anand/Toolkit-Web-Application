@@ -277,7 +277,26 @@ textarea{min-height:60px;}
   border:1px solid #eee;
   border-radius:4px;
   margin-bottom:8px;
+  position:relative;
 }
+.pdf-page-card .overlay-badge{
+  position:absolute; top:4px; right:4px; z-index:2;
+  background:rgba(30,61,63,0.85); color:#fff;
+  font-size:10px; line-height:1; padding:3px 6px; border-radius:10px;
+  pointer-events:none;
+}
+.placement-panel{ align-items:center; }
+.placement-positions{ align-items:center; }
+.pos-btn{
+  background:#fff; border:1px solid var(--teal); color:var(--teal);
+  padding:6px 10px; border-radius:6px; font-size:12px; cursor:pointer;
+}
+.pos-btn:hover{ background:#f0efe9; }
+.pos-btn.active{ background:var(--teal); color:#fff; }
+#placePageSelect{
+  padding:7px 8px; border:1px solid #d7d3c8; border-radius:6px; font-size:13px; background:#fff;
+}
+#placeSizeRange{ width:110px; }
 .pdf-page-card .thumb-box img{
   max-width:100%;
   max-height:100%;
@@ -332,6 +351,96 @@ textarea{min-height:60px;}
 .zip-row .zip-dl:hover{ background:#e5e2d9; }
 .zip-row .zip-dl:disabled{ opacity:.4; cursor:not-allowed; }
 
+/* ================= IMAGE EDITOR TAB ================= */
+.img-select{
+  padding:7px 8px; border:1px solid #d7d3c8; border-radius:6px; font-size:13px; background:#fff;
+}
+#imgQualityRange{ width:110px; }
+.img-editor-layout{
+  display:grid; grid-template-columns:1fr 320px; gap:22px; align-items:start;
+}
+.img-canvas-col{ min-width:0; }
+.img-canvas-wrap{
+  position:relative; display:inline-block; max-width:100%;
+  background:
+    linear-gradient(45deg,#eee 25%,transparent 25%),
+    linear-gradient(-45deg,#eee 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#eee 75%),
+    linear-gradient(-45deg,transparent 75%,#eee 75%);
+  background-size:20px 20px;
+  background-position:0 0,0 10px,10px -10px,-10px 0;
+  border:1px solid var(--line); border-radius:10px; overflow:hidden; user-select:none;
+}
+#imgCanvas{ display:block; max-width:100%; height:auto; cursor:crosshair; }
+#imgCanvas.no-crop{ cursor:default; }
+.crop-box{
+  position:absolute; border:2px dashed var(--gold);
+  background:rgba(201,162,75,0.18); pointer-events:none;
+}
+.img-hint{ font-size:12px; color:#8a8a8a; margin-top:8px; }
+.img-controls-col{ display:flex; flex-direction:column; gap:16px; }
+.img-panel{
+  background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 16px;
+}
+.img-panel h3{
+  font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--teal);
+  margin:0 0 10px;
+}
+.img-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:6px; }
+.img-row:last-child{ margin-bottom:0; }
+.file-btn.sm{ padding:7px 10px; font-size:12px; }
+.img-field{ flex:1 1 0; min-width:90px; }
+.img-field label{ display:block; font-size:11px; color:#777; margin-bottom:3px; }
+.img-field input[type=number]{
+  width:100%; padding:6px 8px; border:1px solid #d7d3c8; border-radius:5px; font-size:13px;
+}
+.img-check{ display:flex; align-items:center; gap:6px; font-size:12px; color:#555; margin-top:6px; }
+.img-check input{ width:14px; height:14px; }
+.img-slider-row{ margin-bottom:12px; }
+.img-slider-row:last-child{ margin-bottom:0; }
+.img-slider-row label{
+  display:flex; justify-content:space-between; font-size:12px; color:#555; margin-bottom:4px;
+}
+.img-slider-row input[type=range]{ width:100%; }
+
+/* ================= EXCEL CLEANER TAB ================= */
+.excel-layout{
+  display:grid; grid-template-columns:260px 1fr; gap:20px; align-items:start;
+}
+.excel-options-panel .img-check{ margin-top:4px; margin-bottom:4px; }
+.excel-stats{
+  margin-top:14px; padding-top:12px; border-top:1px solid var(--line);
+  font-size:12px; color:#555; line-height:1.7;
+}
+.excel-stats b{ color:var(--teal-dark); }
+.excel-table-wrap{
+  background:#fff; border:1px solid var(--line); border-radius:10px;
+  overflow:auto; max-height:640px;
+}
+.excel-table{ border-collapse:collapse; width:100%; font-size:12.5px; }
+.excel-table th, .excel-table td{
+  padding:6px 10px; border:1px solid #eee; white-space:nowrap; text-align:left;
+}
+.excel-table th{
+  background:#f0efe9; color:var(--teal-dark); position:sticky; top:0; font-weight:700;
+}
+.excel-table tr:nth-child(even) td{ background:#fbfaf7; }
+.excel-table-note{ padding:10px 14px; font-size:11.5px; color:#999; border-top:1px solid var(--line); }
+
+/* ================= FILE CONVERSION TAB ================= */
+.conv-layout{
+  display:grid; grid-template-columns:1fr 320px; gap:22px; align-items:start;
+}
+.conv-preview-col{ min-width:0; }
+.conv-thumb-wrap{
+  display:flex; align-items:center; justify-content:center;
+  min-height:200px; max-height:420px; padding:12px;
+}
+.conv-thumb-wrap img{ max-width:100%; max-height:400px; display:block; }
+.conv-controls-col{ display:flex; flex-direction:column; gap:16px; }
+.conv-audio-info{ font-size:13px; color:#555; line-height:1.7; }
+#convDataPreview{ max-height:420px; }
+
 /* ================= RESPONSIVE ================= */
 @media (max-width: 900px){
   .card-grid{ grid-template-columns:1fr; max-width:420px; }
@@ -343,6 +452,9 @@ textarea{min-height:60px;}
      instead of squashing the layout. */
   .preview-panel{ overflow-x:auto; align-items:flex-start; }
   .topbar{ flex-direction:column; align-items:flex-start; gap:8px; }
+  .img-editor-layout{ grid-template-columns:1fr; }
+  .excel-layout{ grid-template-columns:1fr; }
+  .conv-layout{ grid-template-columns:1fr; }
 }
 @media (max-width: 480px){
   #view-home{ padding:40px 16px 32px; }

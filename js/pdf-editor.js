@@ -2,15 +2,21 @@
    MODULE 2: PDF EDITOR
    Client-side page-level PDF editing using pdf-lib (editing/export)
    and pdf.js (thumbnail rendering).
-   Supports: rotate, delete, reorder, merge, add image as a page,
+   Supports: rotate, delete, reorder, merge, add image as a new
+   page, place an image onto an existing page (logo/stamp/signature),
    selective extract, watermark.
    ============================================================ */
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 let sourceDocs = {};   // sourceId -> { pdfLibDoc }
-let workingPages = []; // { key, sourceId, srcPageIndex, rotation, include, thumb }
+let workingPages = []; // { key, sourceId, srcPageIndex, rotation, include, thumb, displayThumb, overlays }
 let srcCounter = 0;
 let pageKeyCounter = 0;
+let overlayCounter = 0;
+
+// State for the "place image on page" workflow
+let pendingPlacement = null;   // { dataURL, isPng }
+let currentPlacementPos = 'bottom-right';
 
 document.getElementById('pdfOpenInput').addEventListener('change', async (e) => {
   const file = e.target.files[0];
@@ -20,6 +26,7 @@ document.getElementById('pdfOpenInput').addEventListener('change', async (e) => 
   workingPages = [];
   await loadPdfIntoWorkingSet(file);
   document.getElementById('mergeBtn').disabled = false;
+  document.getElementById('placeImageBtn').disabled = false;
   document.getElementById('pdfDownloadBtn').disabled = false;
   document.getElementById('pdfEmptyState').style.display = 'none';
   renderPdfGrid();
@@ -39,11 +46,42 @@ document.getElementById('imageAddInput').addEventListener('change', async (e) =>
   if(!file) return;
   await loadImageIntoWorkingSet(file);
   document.getElementById('mergeBtn').disabled = false;
+  document.getElementById('placeImageBtn').disabled = false;
   document.getElementById('pdfDownloadBtn').disabled = false;
   document.getElementById('pdfEmptyState').style.display = 'none';
   renderPdfGrid();
   e.target.value = '';
 });
+
+document.getElementById('imagePlaceInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const isPng = file.type === 'image/png' || /\.png$/i.test(file.name);
+  const isJpg = file.type === 'image/jpeg' || /\.(jpe?g)$/i.test(file.name);
+  if(!isPng && !isJpg){
+    alert('Only PNG and JPEG images can be placed on a page.');
+    e.target.value = '';
+    return;
+  }
+  if(workingPages.length === 0){
+    alert('Open or create a PDF first, then place an image onto one of its pages.');
+    e.target.value = '';
+    return;
+  }
+  const dataURL = await fileToDataURL(file);
+  pendingPlacement = { dataURL, isPng };
+  openPlacementPanel();
+  e.target.value = '';
+});
+
+function fileToDataURL(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 async function loadPdfIntoWorkingSet(file){
   setStatus('Loading ' + file.name + '...');
@@ -155,17 +193,21 @@ function renderPdfGrid(){
     const card = document.createElement('div');
     card.className = 'pdf-page-card' + (wp.include ? '' : ' excluded');
     const rotClass = (wp.rotation === 90 || wp.rotation === 270) ? 'rot-90' : '';
+    const hasOverlays = wp.overlays && wp.overlays.length > 0;
+    const thumbSrc = wp.displayThumb || wp.thumb;
     card.innerHTML = `
       <input type="checkbox" class="include-toggle" ${wp.include ? 'checked' : ''} title="Include in export"
         onchange="toggleInclude('${wp.key}', this.checked)">
       <div class="thumb-box">
-        <img src="${wp.thumb}" class="${rotClass}" style="transform: rotate(${wp.rotation}deg);">
+        ${hasOverlays ? `<div class="overlay-badge" title="${wp.overlays.length} image(s) placed">🖼 ×${wp.overlays.length}</div>` : ''}
+        <img src="${thumbSrc}" class="${rotClass}" style="transform: rotate(${wp.rotation}deg);">
       </div>
       <div class="page-num">Page ${idx + 1}${wp.rotation ? ' · ' + wp.rotation + '°' : ''}</div>
       <div class="page-controls">
         <button onclick="movePage('${wp.key}', -1)" title="Move left">←</button>
         <button onclick="movePage('${wp.key}', 1)" title="Move right">→</button>
         <button onclick="rotatePage('${wp.key}')" title="Rotate 90°">⟳</button>
+        ${hasOverlays ? `<button onclick="removeOverlays('${wp.key}')" title="Remove placed image(s)">🖼✕</button>` : ''}
         <button onclick="deletePage('${wp.key}')" title="Delete page">✕</button>
       </div>
     `;
@@ -191,6 +233,7 @@ function deletePage(key){
     document.getElementById('pdfEmptyState').style.display = 'block';
     document.getElementById('pdfDownloadBtn').disabled = true;
     document.getElementById('mergeBtn').disabled = true;
+    document.getElementById('placeImageBtn').disabled = true;
   }
   renderPdfGrid();
   setStatus(workingPages.length + ' page(s) remaining.');
@@ -203,6 +246,134 @@ function movePage(key, dir){
   const [item] = workingPages.splice(idx, 1);
   workingPages.splice(newIdx, 0, item);
   renderPdfGrid();
+}
+
+/* ---------------- Place image onto an existing page ---------------- */
+
+function openPlacementPanel(){
+  const select = document.getElementById('placePageSelect');
+  select.innerHTML = '';
+  workingPages.forEach((wp, idx) => {
+    const opt = document.createElement('option');
+    opt.value = wp.key;
+    opt.textContent = 'Page ' + (idx + 1);
+    select.appendChild(opt);
+  });
+  currentPlacementPos = 'bottom-right';
+  document.querySelectorAll('.pos-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.pos === currentPlacementPos);
+  });
+  document.getElementById('placeSizeRange').value = 30;
+  document.getElementById('placeSizeVal').textContent = '30%';
+  document.getElementById('imagePlacementPanel').style.display = 'flex';
+}
+
+function selectPlacementPos(btn){
+  currentPlacementPos = btn.dataset.pos;
+  document.querySelectorAll('.pos-btn').forEach(b => b.classList.toggle('active', b === btn));
+}
+
+function cancelPlacement(){
+  pendingPlacement = null;
+  document.getElementById('imagePlacementPanel').style.display = 'none';
+}
+
+function confirmPlaceImage(){
+  if(!pendingPlacement) return;
+  const key = document.getElementById('placePageSelect').value;
+  const sizePct = parseInt(document.getElementById('placeSizeRange').value, 10);
+  const wp = workingPages.find(p => p.key === key);
+  if(!wp) return;
+
+  wp.overlays = wp.overlays || [];
+  wp.overlays.push({
+    id: 'ov' + (overlayCounter++),
+    dataURL: pendingPlacement.dataURL,
+    isPng: pendingPlacement.isPng,
+    position: currentPlacementPos,
+    sizePct
+  });
+
+  const pageIdx = workingPages.findIndex(p => p.key === key);
+  cancelPlacement();
+  refreshPageThumbnail(key).then(() => {
+    setStatus('Image placed on page ' + (pageIdx + 1) + '. It will be baked in when you download.');
+  });
+}
+
+function removeOverlays(key){
+  const wp = workingPages.find(p => p.key === key);
+  if(!wp || !wp.overlays || wp.overlays.length === 0) return;
+  if(!confirm('Remove the placed image(s) from this page?')) return;
+  wp.overlays = [];
+  wp.displayThumb = null;
+  renderPdfGrid();
+  setStatus('Removed placed image(s) from that page.');
+}
+
+// Computes a draw rect (bottom-left origin, like PDF space) for an overlay,
+// given the container's width/height (works for both real PDF points and
+// thumbnail pixels since it's all proportional).
+function computeOverlayRect(containerW, containerH, imgRatio, sizePct, position){
+  const w = containerW * (sizePct / 100);
+  const h = w / imgRatio;
+  const margin = Math.min(containerW, containerH) * 0.04;
+  let x, y;
+  switch(position){
+    case 'top-left':     x = margin;                 y = containerH - margin - h; break;
+    case 'top-right':    x = containerW - margin - w; y = containerH - margin - h; break;
+    case 'bottom-left':  x = margin;                 y = margin; break;
+    case 'center':        x = (containerW - w) / 2;   y = (containerH - h) / 2; break;
+    case 'bottom-right':
+    default:              x = containerW - margin - w; y = margin; break;
+  }
+  return { x, y, w, h };
+}
+
+function loadImageEl(src){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+// Rebuilds wp.displayThumb by compositing every placed overlay onto a fresh
+// copy of the page's base thumbnail, so the grid preview matches what will
+// actually be baked into the PDF on download.
+async function refreshPageThumbnail(key){
+  const wp = workingPages.find(p => p.key === key);
+  if(!wp) return;
+  if(!wp.overlays || wp.overlays.length === 0){
+    wp.displayThumb = null;
+    renderPdfGrid();
+    return;
+  }
+  const baseImg = await loadImageEl(wp.thumb);
+  const canvas = document.createElement('canvas');
+  canvas.width = baseImg.width;
+  canvas.height = baseImg.height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(baseImg, 0, 0);
+
+  for(const ov of wp.overlays){
+    const ovImg = await loadImageEl(ov.dataURL);
+    const rect = computeOverlayRect(canvas.width, canvas.height, ovImg.width / ovImg.height, ov.sizePct, ov.position);
+    // Flip from bottom-left (PDF-style) origin to canvas's top-left origin.
+    ctx.drawImage(ovImg, rect.x, canvas.height - rect.y - rect.h, rect.w, rect.h);
+  }
+
+  wp.displayThumb = canvas.toDataURL('image/png');
+  renderPdfGrid();
+}
+
+function dataURLToUint8Array(dataURL){
+  const base64 = dataURL.split(',')[1];
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for(let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
 }
 
 function setStatus(msg){
@@ -226,6 +397,16 @@ async function downloadEditedPdf(){
       const baseAngle = copiedPage.getRotation().angle;
       copiedPage.setRotation(PDFLib.degrees((baseAngle + wp.rotation) % 360));
       outDoc.addPage(copiedPage);
+
+      if(wp.overlays && wp.overlays.length){
+        const { width: pw, height: ph } = copiedPage.getSize();
+        for(const ov of wp.overlays){
+          const bytes = dataURLToUint8Array(ov.dataURL);
+          const embedded = ov.isPng ? await outDoc.embedPng(bytes) : await outDoc.embedJpg(bytes);
+          const rect = computeOverlayRect(pw, ph, embedded.width / embedded.height, ov.sizePct, ov.position);
+          copiedPage.drawImage(embedded, { x: rect.x, y: rect.y, width: rect.w, height: rect.h });
+        }
+      }
     }
 
     const watermark = document.getElementById('watermarkText').value.trim();

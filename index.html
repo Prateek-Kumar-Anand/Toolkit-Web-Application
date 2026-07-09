@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Toolkit — Resume, PDF, Excel & Zip</title>
-<meta name="description" content="Build a formatted resume, edit PDFs, clean Excel files, and unzip archives — all in your browser, no backend required.">
+<title>Student Toolkit — Resume, PDF, Excel, Zip, Image & File Conversion</title>
+<meta name="description" content="Build a formatted resume, edit PDFs, clean Excel files, unzip archives, edit images, and convert file formats — all in your browser, no backend required.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -29,6 +29,8 @@
     <button class="tab-btn" data-view="pdf" onclick="showView('pdf')">🛠 PDF Editing</button>
     <button class="tab-btn" data-view="excel" onclick="showView('excel')">📊 Excel Cleaning</button>
     <button class="tab-btn" data-view="zip" onclick="showView('zip')">🗜 .zip operation</button>
+    <button class="tab-btn" data-view="image" onclick="showView('image')">🖼 Image Editing</button>
+    <button class="tab-btn" data-view="convert" onclick="showView('convert')">🔄 File Conversion</button>
   </div>
 </div>
 
@@ -37,7 +39,7 @@
   <div class="hero">
     <div class="hero-eyebrow">Free & runs entirely in your browser</div>
     <h1>Student Toolkit</h1>
-    <p class="hero-sub">Four tools college students actually need — build a resume, edit a PDF, clean up a spreadsheet, and unzip an archive. No sign-up, no uploads to a server, nothing to install.</p>
+    <p class="hero-sub">Six tools college students actually need — build a resume, edit a PDF, clean up a spreadsheet, unzip an archive, touch up a photo, and convert file formats. No sign-up, no uploads to a server, nothing to install.</p>
   </div>
 
   <div class="card-grid">
@@ -51,7 +53,7 @@
     <button class="tool-card" onclick="showView('pdf')">
       <div class="tool-icon">🛠</div>
       <div class="tool-name">PDF Editing</div>
-      <div class="tool-desc">Rotate, delete, reorder, merge, extract pages, or add a watermark to any PDF.</div>
+      <div class="tool-desc">Rotate, delete, reorder, merge, place or add images, extract pages, or add a watermark to any PDF.</div>
       <div class="tool-cta">Edit a PDF →</div>
     </button>
 
@@ -67,6 +69,20 @@
       <div class="tool-name">.zip operation</div>
       <div class="tool-desc">Unzip an archive right in your browser, preview what's inside, and download only the files you pick.</div>
       <div class="tool-cta">Open a .zip →</div>
+    </button>
+
+    <button class="tool-card" onclick="showView('image')">
+      <div class="tool-icon">🖼</div>
+      <div class="tool-name">Image Editing</div>
+      <div class="tool-desc">Crop, resize, rotate/flip, and fix brightness/contrast/saturation on any photo — then download it.</div>
+      <div class="tool-cta">Edit an image →</div>
+    </button>
+
+    <button class="tool-card" onclick="showView('convert')">
+      <div class="tool-icon">🔄</div>
+      <div class="tool-name">File Conversion</div>
+      <div class="tool-desc">Convert images between PNG/JPEG/WEBP, audio to WAV, and spreadsheets between CSV/TSV/JSON/XLSX.</div>
+      <div class="tool-cta">Convert a file →</div>
     </button>
   </div>
 
@@ -188,7 +204,7 @@
 <div class="view" id="view-pdf">
   <div class="pdf-wrap">
     <h1 class="tool-heading">PDF Editor</h1>
-    <p class="tool-subheading">Open a PDF, then rotate, delete, reorder, merge, add images as pages, or watermark its pages.</p>
+    <p class="tool-subheading">Open a PDF, then rotate, delete, reorder, merge, add images as pages or onto a page, or watermark its pages.</p>
 
     <div class="pdf-toolbar">
       <div class="grp">
@@ -201,30 +217,91 @@
       </div>
       <div class="grp">
         <input type="file" id="imageAddInput" accept="image/png,image/jpeg" style="display:none">
-        <button class="file-btn secondary" id="addImageBtn" onclick="document.getElementById('imageAddInput').click()">+ Add Image</button>
+        <button class="file-btn secondary" id="addImageBtn" onclick="document.getElementById('imageAddInput').click()">+ Add Image as Page</button>
+      </div>
+      <div class="grp">
+        <input type="file" id="imagePlaceInput" accept="image/png,image/jpeg" style="display:none">
+        <button class="file-btn secondary" id="placeImageBtn" onclick="document.getElementById('imagePlaceInput').click()" disabled>+ Place Image on Page</button>
       </div>
       <div class="grp">
         <input type="text" id="watermarkText" placeholder="Watermark text (optional)">
       </div>
       <button id="pdfDownloadBtn" disabled onclick="downloadEditedPdf()">Download Edited PDF</button>
     </div>
+
+    <!-- Placement panel: appears after picking an image to place onto a specific page -->
+    <div class="pdf-toolbar placement-panel" id="imagePlacementPanel" style="display:none;">
+      <div class="grp">
+        <label style="font-size:12px;color:#555;">Place on</label>
+        <select id="placePageSelect"></select>
+      </div>
+      <div class="grp placement-positions">
+        <label style="font-size:12px;color:#555;margin-right:2px;">Position</label>
+        <button type="button" class="pos-btn" data-pos="top-left" onclick="selectPlacementPos(this)">↖ Top-Left</button>
+        <button type="button" class="pos-btn" data-pos="top-right" onclick="selectPlacementPos(this)">↗ Top-Right</button>
+        <button type="button" class="pos-btn" data-pos="center" onclick="selectPlacementPos(this)">◆ Center</button>
+        <button type="button" class="pos-btn" data-pos="bottom-left" onclick="selectPlacementPos(this)">↙ Bottom-Left</button>
+        <button type="button" class="pos-btn active" data-pos="bottom-right" onclick="selectPlacementPos(this)">↘ Bottom-Right</button>
+      </div>
+      <div class="grp">
+        <label style="font-size:12px;color:#555;">Size <span id="placeSizeVal">30%</span></label>
+        <input type="range" id="placeSizeRange" min="5" max="100" value="30" oninput="document.getElementById('placeSizeVal').textContent = this.value + '%'">
+      </div>
+      <button class="file-btn" onclick="confirmPlaceImage()">Add to Page</button>
+      <button class="file-btn secondary" onclick="cancelPlacement()">Cancel</button>
+    </div>
+
     <div class="pdf-status" id="pdfStatus"></div>
     <div id="pdfEmptyState" class="pdf-empty">
-      No PDF loaded yet. Click <strong>Open PDF</strong> to get started — or click <strong>+ Add Image</strong> to start a new PDF from a photo/scan.<br>
-      Once loaded you can rotate, delete, reorder, extract pages, merge in another PDF, add images as new pages, and add a watermark.
+      No PDF loaded yet. Click <strong>Open PDF</strong> to get started — or click <strong>+ Add Image as Page</strong> to start a new PDF from a photo/scan.<br>
+      Once loaded you can rotate, delete, reorder, extract pages, merge in another PDF, add images as new pages, place an image onto any existing page (like a logo, stamp, or signature), and add a watermark.
     </div>
     <div class="pdf-grid" id="pdfGrid"></div>
   </div>
 </div>
 
-<!-- ================= TOOL 3: EXCEL CLEANING (placeholder) ================= -->
+<!-- ================= TOOL 3: EXCEL CLEANING ================= -->
 <div class="view" id="view-excel">
   <div class="pdf-wrap">
     <h1 class="tool-heading">Excel Cleaner</h1>
-    <p class="tool-subheading">Coming soon.</p>
-    <div class="pdf-empty" style="margin-top:20px;">
-      This tab will let you upload a messy .xlsx/.csv, clean it up
-      (remove blank rows/columns, trim whitespace, fix headers, dedupe), and download the result.
+    <p class="tool-subheading">Open a messy .xlsx/.xls/.csv, tidy it up, preview the result, and download the cleaned file.</p>
+
+    <div class="pdf-toolbar">
+      <div class="grp">
+        <input type="file" id="excelOpenInput" accept=".xlsx,.xls,.csv" style="display:none">
+        <button class="file-btn" onclick="document.getElementById('excelOpenInput').click()">Open Spreadsheet</button>
+      </div>
+      <div class="grp" id="excelSheetGrp" style="display:none;">
+        <label style="font-size:12px;color:#555;">Sheet</label>
+        <select id="excelSheetSelect" onchange="onExcelSheetChange()"></select>
+      </div>
+      <div class="grp">
+        <label style="font-size:12px;color:#555;">Format</label>
+        <select id="excelFormatSelect" class="img-select">
+          <option value="xlsx">XLSX</option>
+          <option value="csv">CSV</option>
+        </select>
+      </div>
+      <button id="excelDownloadBtn" disabled onclick="downloadCleanedExcel()">Download Cleaned File</button>
+    </div>
+    <div class="pdf-status" id="excelStatus"></div>
+
+    <div id="excelEmptyState" class="pdf-empty">
+      No spreadsheet loaded yet. Click <strong>Open Spreadsheet</strong> to get started.<br>
+      Once loaded you can remove blank rows/columns, trim stray spaces, normalize the header row, and drop duplicate rows — with a live preview before you download.
+    </div>
+
+    <div class="excel-layout" id="excelLayout" style="display:none;">
+      <div class="excel-options-panel img-panel">
+        <h3>Cleaning Options</h3>
+        <label class="img-check"><input type="checkbox" id="optTrim" checked onchange="runExcelClean()"> Trim stray spaces in cells</label>
+        <label class="img-check"><input type="checkbox" id="optBlankRows" checked onchange="runExcelClean()"> Remove blank rows</label>
+        <label class="img-check"><input type="checkbox" id="optBlankCols" checked onchange="runExcelClean()"> Remove blank columns</label>
+        <label class="img-check"><input type="checkbox" id="optHeaders" checked onchange="runExcelClean()"> Normalize header row</label>
+        <label class="img-check"><input type="checkbox" id="optDedupe" onchange="runExcelClean()"> Remove duplicate rows</label>
+        <div class="excel-stats" id="excelStats"></div>
+      </div>
+      <div class="excel-table-wrap" id="excelTableWrap"></div>
     </div>
   </div>
 </div>
@@ -257,10 +334,222 @@
   </div>
 </div>
 
+<!-- ================= TOOL 5: IMAGE EDITING ================= -->
+<div class="view" id="view-image">
+  <div class="pdf-wrap">
+    <h1 class="tool-heading">Image Editor</h1>
+    <p class="tool-subheading">Open a photo, then crop, resize, rotate/flip, or fix brightness, contrast & saturation — all in your browser.</p>
+
+    <div class="pdf-toolbar">
+      <div class="grp">
+        <input type="file" id="imgOpenInput" accept="image/png,image/jpeg,image/webp" style="display:none">
+        <button class="file-btn" onclick="document.getElementById('imgOpenInput').click()">Open Image</button>
+      </div>
+      <div class="grp">
+        <button class="file-btn secondary" id="imgUndoBtn" onclick="imgUndo()" disabled>↶ Undo</button>
+        <button class="file-btn secondary" id="imgResetBtn" onclick="imgResetAll()" disabled>Reset</button>
+      </div>
+      <div class="grp">
+        <label for="imgFormatSelect" style="font-size:12px;color:#555;">Format</label>
+        <select id="imgFormatSelect" class="img-select">
+          <option value="image/png">PNG</option>
+          <option value="image/jpeg">JPEG</option>
+          <option value="image/webp">WEBP</option>
+        </select>
+      </div>
+      <div class="grp" id="imgQualityGrp" style="display:none;">
+        <label for="imgQualityRange" style="font-size:12px;color:#555;">Quality</label>
+        <input type="range" id="imgQualityRange" min="0.1" max="1" step="0.05" value="0.92">
+      </div>
+      <button id="imgDownloadBtn" disabled onclick="downloadEditedImage()">Download Image</button>
+    </div>
+    <div class="pdf-status" id="imgStatus"></div>
+
+    <div id="imgEmptyState" class="pdf-empty">
+      No image loaded yet. Click <strong>Open Image</strong> to get started.<br>
+      Once loaded you can crop, resize, rotate, flip, and correct brightness/contrast/saturation, then download the result.
+    </div>
+
+    <div class="img-editor-layout" id="imgEditorLayout" style="display:none;">
+      <!-- Canvas + crop overlay -->
+      <div class="img-canvas-col">
+        <div class="img-canvas-wrap" id="imgCanvasWrap">
+          <canvas id="imgCanvas"></canvas>
+          <div class="crop-box" id="imgCropBox" style="display:none;"></div>
+        </div>
+        <div class="img-hint" id="imgCropHint" style="display:none;">Drag on the image to select a crop area, then click "Apply Crop".</div>
+      </div>
+
+      <!-- Controls panel -->
+      <div class="img-controls-col">
+
+        <div class="img-panel">
+          <h3>Crop</h3>
+          <div class="img-row">
+            <button class="file-btn secondary sm" id="imgCropStartBtn" onclick="imgStartCrop()">Select Area</button>
+            <button class="file-btn sm" id="imgCropApplyBtn" onclick="imgApplyCrop()" disabled>Apply Crop</button>
+            <button class="file-btn secondary sm" id="imgCropCancelBtn" onclick="imgCancelCrop()" disabled>Cancel</button>
+          </div>
+        </div>
+
+        <div class="img-panel">
+          <h3>Resize</h3>
+          <div class="img-row">
+            <div class="img-field">
+              <label>Width (px)</label>
+              <input type="number" id="imgWidthInput" min="1">
+            </div>
+            <div class="img-field">
+              <label>Height (px)</label>
+              <input type="number" id="imgHeightInput" min="1">
+            </div>
+          </div>
+          <label class="img-check"><input type="checkbox" id="imgLockAspect" checked> Lock aspect ratio</label>
+          <button class="file-btn sm" style="margin-top:8px;" onclick="imgApplyResize()">Apply Resize</button>
+        </div>
+
+        <div class="img-panel">
+          <h3>Rotate & Flip</h3>
+          <div class="img-row">
+            <button class="file-btn secondary sm" onclick="imgRotate(-90)">⟲ Rotate Left</button>
+            <button class="file-btn secondary sm" onclick="imgRotate(90)">⟳ Rotate Right</button>
+          </div>
+          <div class="img-row">
+            <button class="file-btn secondary sm" onclick="imgFlip('h')">⇋ Flip Horizontal</button>
+            <button class="file-btn secondary sm" onclick="imgFlip('v')">⇵ Flip Vertical</button>
+          </div>
+        </div>
+
+        <div class="img-panel">
+          <h3>Adjust</h3>
+          <div class="img-slider-row">
+            <label>Brightness <span id="imgBrightnessVal">100%</span></label>
+            <input type="range" id="imgBrightness" min="0" max="200" value="100">
+          </div>
+          <div class="img-slider-row">
+            <label>Contrast <span id="imgContrastVal">100%</span></label>
+            <input type="range" id="imgContrast" min="0" max="200" value="100">
+          </div>
+          <div class="img-slider-row">
+            <label>Saturation <span id="imgSaturationVal">100%</span></label>
+            <input type="range" id="imgSaturation" min="0" max="200" value="100">
+          </div>
+          <div class="img-row">
+            <button class="file-btn sm" onclick="imgApplyAdjustments()">Apply Adjustments</button>
+            <button class="file-btn secondary sm" onclick="imgResetAdjustmentSliders()">Reset Sliders</button>
+          </div>
+        </div>
+
+        <div class="img-panel">
+          <h3>Quick Filters</h3>
+          <div class="img-row">
+            <button class="file-btn secondary sm" onclick="imgApplyPreset('grayscale')">Grayscale</button>
+            <button class="file-btn secondary sm" onclick="imgApplyPreset('sepia')">Sepia</button>
+            <button class="file-btn secondary sm" onclick="imgApplyPreset('invert')">Invert</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= TOOL 6: FILE CONVERSION ================= -->
+<div class="view" id="view-convert">
+  <div class="pdf-wrap">
+    <h1 class="tool-heading">File Conversion</h1>
+    <p class="tool-subheading">Open any image, audio, or spreadsheet/data file and convert it to a different format — all processed locally in your browser.</p>
+
+    <div class="pdf-toolbar">
+      <div class="grp">
+        <input type="file" id="convOpenInput" style="display:none">
+        <button class="file-btn" onclick="document.getElementById('convOpenInput').click()">Open File</button>
+      </div>
+    </div>
+    <div class="pdf-status" id="convStatus"></div>
+
+    <div id="convEmptyState" class="pdf-empty">
+      No file loaded yet. Click <strong>Open File</strong> to get started.<br>
+      Supported right now: <strong>images</strong> (any browser-viewable format → PNG / JPEG / WEBP), <strong>audio</strong> (any browser-playable format → WAV), and <strong>data files</strong> (CSV / TSV / JSON / XLSX / XLS — convert between any of these).
+    </div>
+
+    <!-- IMAGE conversion panel -->
+    <div class="conv-panel" id="convImagePanel" style="display:none;">
+      <div class="conv-layout">
+        <div class="conv-preview-col">
+          <div class="img-canvas-wrap conv-thumb-wrap">
+            <img id="convImagePreview" alt="Preview">
+          </div>
+        </div>
+        <div class="conv-controls-col">
+          <div class="img-panel">
+            <h3>Convert Image</h3>
+            <div class="img-field">
+              <label>Output format</label>
+              <select id="convImageFormat" class="img-select">
+                <option value="image/png">PNG</option>
+                <option value="image/jpeg">JPEG</option>
+                <option value="image/webp">WEBP</option>
+              </select>
+            </div>
+            <div class="img-slider-row" id="convImageQualityRow">
+              <label>Quality <span id="convImageQualityVal">92%</span></label>
+              <input type="range" id="convImageQuality" min="0.1" max="1" step="0.05" value="0.92">
+            </div>
+            <button class="file-btn" style="margin-top:6px;width:100%;" onclick="convertAndDownloadImage()">Convert & Download</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUDIO conversion panel -->
+    <div class="conv-panel" id="convAudioPanel" style="display:none;">
+      <div class="img-panel">
+        <h3>Convert Audio</h3>
+        <div class="conv-audio-info" id="convAudioInfo">Decoding audio...</div>
+        <p class="img-hint" style="margin:6px 0 10px;">Output format: <strong>WAV</strong> (uncompressed, plays everywhere).</p>
+        <button class="file-btn" id="convAudioBtn" onclick="convertAndDownloadAudio()" disabled>Convert & Download WAV</button>
+      </div>
+    </div>
+
+    <!-- DATA / spreadsheet conversion panel -->
+    <div class="conv-panel" id="convDataPanel" style="display:none;">
+      <div class="conv-layout">
+        <div class="conv-controls-col">
+          <div class="img-panel">
+            <h3>Convert Data File</h3>
+            <div class="img-field">
+              <label>Output format</label>
+              <select id="convDataFormat" class="img-select">
+                <option value="csv">CSV</option>
+                <option value="tsv">TSV</option>
+                <option value="json">JSON</option>
+                <option value="xlsx">XLSX</option>
+              </select>
+            </div>
+            <div class="excel-stats" id="convDataStats"></div>
+            <button class="file-btn" style="margin-top:6px;width:100%;" onclick="convertAndDownloadData()">Convert & Download</button>
+          </div>
+        </div>
+        <div class="conv-preview-col">
+          <div class="excel-table-wrap" id="convDataPreview"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- UNSUPPORTED type panel -->
+    <div class="conv-panel" id="convUnsupportedPanel" style="display:none;">
+      <div class="pdf-empty" id="convUnsupportedMsg"></div>
+    </div>
+  </div>
+</div>
+
 <script src="js/tabs.js"></script>
 <script src="js/resume.js"></script>
 <script src="js/pdf-editor.js"></script>
 <script src="js/excel-cleaner.js"></script>
 <script src="js/zip-tool.js"></script>
+<script src="js/image-editor.js"></script>
+<script src="js/file-converter.js"></script>
 </body>
 </html>
