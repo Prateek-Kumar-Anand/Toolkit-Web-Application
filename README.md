@@ -13,10 +13,9 @@ No backend, no build step, no server. Everything runs in the browser and nothing
 
 ## Live Demo
 
-Once deployed on GitHub Pages (see [Deployment](#deployment) below), your app will be live at:
-
+User can access the web page by clicking :-
 ```
-https://<your-username>.github.io/<repo-name>/
+https://prateek-kumar-anand.github.io/Toolkit-Web-Application/
 ```
 
 ---
@@ -129,32 +128,6 @@ npx serve .
 Then visit `http://localhost:8000` in your browser.
 
 ---
-
-## Deployment
-
-This app is 100% static, so **GitHub Pages** is the simplest way to deploy it — no build step, no config files.
-
-### Steps:
-1. If you're starting from the downloaded zip, extract it and make sure `index.html`, `css/`, `js/`, `README.md` etc. are directly inside your project folder — not nested one level deeper inside another folder of the same name.
-2. Push this repo to GitHub:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit: resume, pdf, excel toolkit"
-   git branch -M main
-   git remote add origin https://github.com/<your-username>/<repo-name>.git
-   git push -u origin main
-   ```
-3. On GitHub, go to your repo → **Settings** → **Pages**.
-4. Under **Build and deployment** → **Source**, select **Deploy from a branch**.
-5. Choose branch `main` and folder `/ (root)`, then **Save**.
-6. Wait a minute, then your app will be live at:
-   ```
-   https://<your-username>.github.io/<repo-name>/
-   ```
-
-That's it — every time you push to `main`, GitHub Pages redeploys automatically.
-
 ---
 
 ## Usage Guide
