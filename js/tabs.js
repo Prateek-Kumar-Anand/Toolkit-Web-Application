@@ -20,4 +20,19 @@ function showView(viewName){
   }
 
   window.scrollTo(0, 0);
+  syncTopbarHeight();
 }
+
+/* The topbar can wrap onto two lines on narrower screens (more tools =
+   more tabs). Layouts elsewhere assume a --topbar-h value for their
+   "fill the rest of the viewport" sizing, so keep it measured and
+   accurate instead of a hardcoded guess. */
+function syncTopbarHeight(){
+  const topbar = document.getElementById('topbar');
+  const h = (topbar.style.display === 'none') ? 0 : topbar.offsetHeight;
+  if(h > 0){
+    document.documentElement.style.setProperty('--topbar-h', h + 'px');
+  }
+}
+
+window.addEventListener('resize', syncTopbarHeight);

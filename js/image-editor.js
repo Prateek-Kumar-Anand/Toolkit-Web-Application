@@ -340,8 +340,18 @@ function imgCancelCrop(){
   document.getElementById('imgCropApplyBtn').disabled = true;
 }
 
+function getCanvasOffsetInWrap(){
+  // The wrap can have borders/padding that make its box bigger than the
+  // canvas rendered inside it — measure the canvas itself for anything
+  // pixel-accurate, and only use this offset to place the overlay div
+  // (which is positioned relative to the wrap, not the canvas).
+  const canvasRect = imgCanvas.getBoundingClientRect();
+  const wrapRect = imgCanvasWrap.getBoundingClientRect();
+  return { offsetX: canvasRect.left - wrapRect.left, offsetY: canvasRect.top - wrapRect.top };
+}
+
 function wrapPoint(e){
-  const rect = imgCanvasWrap.getBoundingClientRect();
+  const canvasRect = imgCanvas.getBoundingClientRect();
   let clientX, clientY;
   if(e.changedTouches && e.changedTouches.length){
     // touchend/touchcancel: the finger that lifted is only in changedTouches,
@@ -355,21 +365,26 @@ function wrapPoint(e){
     clientX = e.clientX;
     clientY = e.clientY;
   }
-  let x = clientX - rect.left;
-  let y = clientY - rect.top;
-  x = Math.max(0, Math.min(x, rect.width));
-  y = Math.max(0, Math.min(y, rect.height));
+  // Coordinates are relative to the canvas's own box, in the same CSS-pixel
+  // space it's rendered at — this is what imgApplyCrop scales up from.
+  let x = clientX - canvasRect.left;
+  let y = clientY - canvasRect.top;
+  x = Math.max(0, Math.min(x, canvasRect.width));
+  y = Math.max(0, Math.min(y, canvasRect.height));
   return { x, y };
 }
 
 function drawCropBox(){
   if(!cropStart || !cropCurrent) return;
+  const { offsetX, offsetY } = getCanvasOffsetInWrap();
   const x = Math.min(cropStart.x, cropCurrent.x);
   const y = Math.min(cropStart.y, cropCurrent.y);
   const w = Math.abs(cropCurrent.x - cropStart.x);
   const h = Math.abs(cropCurrent.y - cropStart.y);
-  imgCropBox.style.left = x + 'px';
-  imgCropBox.style.top = y + 'px';
+  // cropStart/cropCurrent are canvas-relative; the overlay div's own
+  // coordinate space is the wrap, so shift by the canvas's offset inside it.
+  imgCropBox.style.left = (offsetX + x) + 'px';
+  imgCropBox.style.top = (offsetY + y) + 'px';
   imgCropBox.style.width = w + 'px';
   imgCropBox.style.height = h + 'px';
   imgCropBox.style.display = 'block';
@@ -404,9 +419,9 @@ imgCanvasWrap.addEventListener('touchend', cropPointerUp);
 
 function imgApplyCrop(){
   if(!cropStart || !cropCurrent) return;
-  const rect = imgCanvasWrap.getBoundingClientRect();
-  const scaleX = baseCanvas.width / rect.width;
-  const scaleY = baseCanvas.height / rect.height;
+  const canvasRect = imgCanvas.getBoundingClientRect();
+  const scaleX = baseCanvas.width / canvasRect.width;
+  const scaleY = baseCanvas.height / canvasRect.height;
 
   const x = Math.min(cropStart.x, cropCurrent.x) * scaleX;
   const y = Math.min(cropStart.y, cropCurrent.y) * scaleY;

@@ -19,6 +19,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
 </head>
 <body>
 
@@ -90,8 +91,8 @@
     <button class="tool-card" onclick="showView('qr')">
       <div class="tool-icon">🔳</div>
       <div class="tool-name">QR Code</div>
-      <div class="tool-desc">Turn any link or text into a scannable QR code — customize size and colors, then download it.</div>
-      <div class="tool-cta">Make a QR code →</div>
+      <div class="tool-desc">Turn any link or text into a scannable QR code, or scan an existing one to read what it links to.</div>
+      <div class="tool-cta">Generate or scan →</div>
     </button>
   </div>
 
@@ -242,14 +243,50 @@
   </div>
 </div>
 
-<!-- ================= TOOL 3: EXCEL CLEANING (placeholder) ================= -->
+<!-- ================= TOOL 3: EXCEL CLEANING ================= -->
 <div class="view" id="view-excel">
   <div class="pdf-wrap">
     <h1 class="tool-heading">Excel Cleaner</h1>
-    <p class="tool-subheading">Coming soon.</p>
-    <div class="pdf-empty" style="margin-top:20px;">
-      This tab will let you upload a messy .xlsx/.csv, clean it up
-      (remove blank rows/columns, trim whitespace, fix headers, dedupe), and download the result.
+    <p class="tool-subheading">Upload a messy .xlsx / .xls / .csv, clean it up, and download the fixed file — all in your browser.</p>
+
+    <div class="pdf-toolbar">
+      <div class="grp">
+        <input type="file" id="excelOpenInput" accept=".xlsx,.xls,.csv" style="display:none">
+        <button class="file-btn" onclick="document.getElementById('excelOpenInput').click()">Open File</button>
+      </div>
+      <div class="grp">
+        <label style="margin:0;font-size:12px;color:#777;">Sheet</label>
+        <select id="excelSheetSelect" class="img-select" disabled onchange="onExcelSheetChange()"></select>
+      </div>
+      <button id="excelDownloadBtn" disabled onclick="downloadCleanedExcel()">Download File</button>
+    </div>
+
+    <div class="pdf-status" id="excelStatus"></div>
+
+    <div id="excelEmptyState" class="pdf-empty">
+      No file loaded yet. Click <strong>Open File</strong> to get started.<br>
+      Supports .xlsx, .xls, and .csv — everything is cleaned locally, nothing is uploaded anywhere.
+    </div>
+
+    <div id="excelWorkArea" style="display:none;">
+      <div class="img-panel" style="margin-bottom:18px;">
+        <h3>Cleaning Options</h3>
+        <div class="img-row">
+          <label class="img-check"><input type="checkbox" id="optRemoveBlankRows" checked> Remove blank rows</label>
+          <label class="img-check"><input type="checkbox" id="optRemoveBlankCols" checked> Remove blank columns</label>
+          <label class="img-check"><input type="checkbox" id="optTrimWhitespace" checked> Trim whitespace</label>
+          <label class="img-check"><input type="checkbox" id="optNormalizeHeaders" checked> Normalize headers</label>
+          <label class="img-check"><input type="checkbox" id="optDedupeRows"> Remove duplicate rows</label>
+        </div>
+        <button class="file-btn sm" style="margin-top:12px;" onclick="applyExcelCleaning()">Apply Cleaning</button>
+      </div>
+
+      <div class="excel-summary" id="excelSummary"></div>
+
+      <div class="excel-table-wrap">
+        <table class="excel-table" id="excelPreviewTable"></table>
+      </div>
+      <div class="img-hint" id="excelMoreRowsHint"></div>
     </div>
   </div>
 </div>
@@ -486,10 +523,15 @@
 <!-- ================= TOOL 7: QR CODE ================= -->
 <div class="view" id="view-qr">
   <div class="pdf-wrap">
-    <h1 class="tool-heading">QR Code Generator</h1>
-    <p class="tool-subheading">Turn any link or text into a scannable QR code, customize how it looks, then download it as a PNG.</p>
+    <h1 class="tool-heading">QR Code Tool</h1>
+    <p class="tool-subheading">Generate a QR code from any link or text, or scan an existing QR code to read what it contains — all in your browser.</p>
 
-    <div class="app qr-app">
+    <div class="qr-mode-toggle">
+      <button class="qr-mode-btn active" id="qrModeGenBtn" onclick="setQrMode('generate')">🔳 Generate</button>
+      <button class="qr-mode-btn" id="qrModeScanBtn" onclick="setQrMode('scan')">📷 Scan</button>
+    </div>
+
+    <div class="app qr-app" id="qrGenerateApp">
       <div class="form-panel">
         <h1>Create a QR Code</h1>
         <p class="sub">Paste a link (or type any text) and tweak the look. The preview updates as you go.</p>
@@ -534,6 +576,44 @@
         <button id="qrDownloadBtn" class="file-btn" onclick="downloadQrCode()" disabled>Download PNG</button>
       </div>
     </div>
+
+    <div class="app qr-app" id="qrScanApp" style="display:none;">
+      <div class="form-panel">
+        <h1>Scan a QR Code</h1>
+        <p class="sub">Upload an image with a QR code, or scan live with your camera. The decoded link or text shows up on the right.</p>
+
+        <div class="section">
+          <h2>From an image</h2>
+          <label>Upload a photo or screenshot containing a QR code</label>
+          <input type="file" id="qrScanFileInput" accept="image/*" style="display:none">
+          <button class="file-btn" onclick="document.getElementById('qrScanFileInput').click()">Upload Image</button>
+        </div>
+
+        <div class="section" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
+          <h2>From your camera</h2>
+          <label>Point your camera at a QR code — it decodes automatically</label>
+          <button class="file-btn secondary" id="qrCameraToggleBtn" onclick="toggleQrCamera()">Start Camera</button>
+        </div>
+      </div>
+
+      <div class="preview-panel">
+        <div class="qr-scan-preview-box">
+          <video id="qrScanVideo" playsinline muted style="display:none;"></video>
+          <img id="qrScanImagePreview" style="display:none;" alt="Uploaded QR code">
+          <div class="qr-scan-placeholder" id="qrScanPlaceholder">No image or camera feed yet.</div>
+        </div>
+        <div class="pdf-status" id="qrScanStatus"></div>
+        <div class="qr-scan-result" id="qrScanResult" style="display:none;">
+          <label>Decoded content</label>
+          <textarea id="qrScanResultText" readonly style="min-height:70px;"></textarea>
+          <div class="row2">
+            <button class="file-btn" id="qrScanOpenBtn" onclick="openScannedQrLink()">Open Link</button>
+            <button class="file-btn secondary" onclick="copyScannedQrText()">Copy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <canvas id="qrScanCanvas" style="display:none;"></canvas>
   </div>
 </div>
 

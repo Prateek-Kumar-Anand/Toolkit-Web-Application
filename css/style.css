@@ -6,6 +6,7 @@
   --ink:#2b2b2b;
   --line:#e3e0d8;
   --bg:#f4f2ee;
+  --topbar-h:58px; /* fallback; tabs.js keeps this in sync with the topbar's real (possibly wrapped) height */
 }
 *{box-sizing:border-box;}
 body{
@@ -41,7 +42,7 @@ button{ font-family:inherit; }
   cursor:pointer;
 }
 .home-link:hover{ background:rgba(255,255,255,0.08); }
-.topbar-tabs{ display:flex; gap:4px; }
+.topbar-tabs{ display:flex; flex-wrap:wrap; gap:4px 4px; row-gap:6px; }
 .topbar-tabs .tab-btn{
   background:none;
   border:none;
@@ -162,14 +163,14 @@ button{ font-family:inherit; }
 .app{
   display:grid;
   grid-template-columns: 420px 1fr;
-  min-height:calc(100vh - 58px);
+  min-height:calc(100vh - var(--topbar-h));
 }
 .form-panel{
   background:#fff;
   border-right:1px solid var(--line);
   padding:24px;
   overflow-y:auto;
-  max-height:calc(100vh - 58px);
+  max-height:calc(100vh - var(--topbar-h));
 }
 .form-panel h1{ font-family:'Lora',serif; font-size:20px; margin:0 0 4px; color:var(--teal-dark); }
 .form-panel p.sub{ margin:0 0 20px; font-size:13px; color:#777; }
@@ -195,7 +196,7 @@ textarea{min-height:60px;}
 }
 #downloadBtn:hover{filter:brightness(0.95);}
 #downloadBtn:disabled{opacity:.6; cursor:wait;}
-.preview-panel{ padding:32px; display:flex; flex-direction:column; align-items:center; overflow:auto; max-height:calc(100vh - 58px); }
+.preview-panel{ padding:32px; display:flex; flex-direction:column; align-items:center; overflow:auto; max-height:calc(100vh - var(--topbar-h)); }
 .page-shadow{ box-shadow:0 4px 24px rgba(0,0,0,0.15); margin-bottom:12px; flex:0 0 auto; }
 /* Fixed A4-ratio window (794x1123px = 210x297mm @96dpi). Content taller than
    this is auto-scaled down (see fitResumeToOnePage in resume.js) so the
@@ -332,6 +333,29 @@ textarea{min-height:60px;}
 .zip-row .zip-dl:hover{ background:#e5e2d9; }
 .zip-row .zip-dl:disabled{ opacity:.4; cursor:not-allowed; }
 
+/* ================= EXCEL CLEANER TAB ================= */
+.excel-summary{
+  font-size:12.5px; color:#555; background:#fff; border:1px solid var(--line);
+  border-radius:8px; padding:10px 14px; margin-bottom:14px; line-height:1.6;
+}
+.excel-summary strong{ color:var(--teal-dark); }
+.excel-table-wrap{
+  background:#fff; border:1px solid var(--line); border-radius:10px;
+  overflow:auto; max-height:520px;
+}
+.excel-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+.excel-table th, .excel-table td{
+  padding:7px 12px; border-bottom:1px solid var(--line); border-right:1px solid #f0efe9;
+  white-space:nowrap; text-align:left;
+}
+.excel-table th{
+  position:sticky; top:0; background:#f7f6f2; color:var(--teal-dark);
+  font-weight:700; z-index:1;
+}
+.excel-table tr:last-child td{ border-bottom:none; }
+.excel-table td:last-child, .excel-table th:last-child{ border-right:none; }
+.excel-table tr:nth-child(even) td{ background:#fbfaf7; }
+
 /* ================= IMAGE EDITOR TAB ================= */
 .img-select{
   padding:7px 8px; border:1px solid #d7d3c8; border-radius:6px; font-size:13px; background:#fff;
@@ -424,6 +448,26 @@ textarea{min-height:60px;}
 #qrCodeBox{ line-height:0; }
 #qrDownloadBtn{ width:100%; max-width:320px; }
 #qrDownloadBtn:disabled{ opacity:.5; cursor:not-allowed; }
+.qr-mode-toggle{ display:flex; gap:8px; margin-bottom:18px; }
+.qr-mode-btn{
+  background:#fff; color:var(--teal); border:1px solid var(--line); padding:9px 18px;
+  border-radius:7px; font-size:13px; font-weight:600; cursor:pointer;
+}
+.qr-mode-btn:hover{ background:#f0efe9; }
+.qr-mode-btn.active{ background:var(--teal); color:#fff; border-color:var(--teal); }
+.qr-scan-preview-box{
+  background:#fff; border:1px solid var(--line); border-radius:14px; padding:20px;
+  display:flex; align-items:center; justify-content:center; min-height:280px;
+  width:100%; max-width:420px; overflow:hidden;
+}
+.qr-scan-preview-box video, .qr-scan-preview-box img{
+  max-width:100%; max-height:360px; border-radius:6px;
+}
+.qr-scan-placeholder{ color:#999; font-size:13px; text-align:center; padding:20px; }
+.qr-scan-result{ width:100%; max-width:420px; margin-top:16px; }
+.qr-scan-result label{ margin-top:0; }
+.qr-scan-result textarea{ font-family:inherit; }
+#qrScanOpenBtn:disabled{ opacity:.5; cursor:not-allowed; }
 
 /* ================= RESPONSIVE ================= */
 @media (max-width: 900px){
