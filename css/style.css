@@ -202,7 +202,7 @@ textarea{min-height:60px;}
    this is auto-scaled down (see fitResumeToOnePage in resume.js) so the
    live preview - and the exported PDF - is always exactly one page. */
 .page-frame{ width:794px; height:1123px; overflow:hidden; position:relative; background:#fff; }
-#resume{ width:794px; min-height:1123px; background:#fff; display:flex; align-items:stretch; position:absolute; top:0; left:0; transform-origin:top left; }
+.resume-tpl{ width:794px; min-height:1123px; background:#fff; display:none; align-items:stretch; position:absolute; top:0; left:0; transform-origin:top left; font-family:'Source Sans 3', sans-serif; }
 .page-fit-note{ font-size:12px; color:#8a8a8a; text-align:center; max-width:794px; }
 .sidebar{ background:var(--teal); color:#eef3f1; padding:34px 24px; flex:0 0 270px; width:270px; }
 .sidebar .name{ font-family:'Lora',serif; font-size:26px; font-weight:700; line-height:1.15; margin:0 0 6px; }
@@ -229,6 +229,110 @@ textarea{min-height:60px;}
 .cert-list li{ font-size:12.5px; line-height:1.6; margin-bottom:5px; padding-left:14px; position:relative; color:#333; }
 .cert-list li::before{ content:""; position:absolute; left:1px; top:5px; width:6px; height:6px; background:var(--gold); transform:rotate(45deg); }
 .proj-title{ font-weight:700; font-size:13.5px; color:var(--teal-dark); margin-bottom:3px; }
+
+/* ================= CV TEMPLATE PICKER ================= */
+.tmpl-picker{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.tmpl-option{
+  border:2px solid var(--line); border-radius:8px; padding:8px; cursor:pointer;
+  text-align:center; transition:border-color .15s ease, background .15s ease;
+}
+.tmpl-option:hover{ border-color:var(--gold); }
+.tmpl-option.active{ border-color:var(--teal); background:var(--teal-soft); }
+.tmpl-swatch{ height:44px; border-radius:5px; display:flex; overflow:hidden; margin-bottom:6px; }
+.tmpl-swatch span:first-child{ width:34%; }
+.tmpl-swatch span:last-child{ width:66%; background:#fff; }
+.tmpl-swatch-classic span:first-child{ background:var(--teal); }
+.tmpl-swatch-minimal{ background:#fff; border:1px solid var(--line); }
+.tmpl-swatch-minimal span:first-child{ width:100%; background:repeating-linear-gradient(180deg,#333 0 2px,#fff 2px 8px); }
+.tmpl-swatch-minimal span:last-child{ width:0; }
+.tmpl-swatch-student span:first-child{ width:66%; background:#fff; }
+.tmpl-swatch-student span:last-child{ width:34%; background:#2f6fb0; }
+.tmpl-swatch-executive span:first-child{ background:#1a1a1a; width:30%; }
+.tmpl-option-label{ font-size:12px; font-weight:600; color:#555; }
+.tmpl-option.active .tmpl-option-label{ color:var(--teal-dark); }
+input[type=file]{ font-size:12px; }
+
+/* ================= PHOTO (shared by minimal / student / executive) ================= */
+.photo-img{ object-fit:cover; display:block; }
+.photo-placeholder{
+  display:flex; align-items:center; justify-content:center; background:#e3e0d8; color:#999;
+  font-size:11px; text-transform:uppercase; letter-spacing:.08em;
+}
+.photo-circle{ width:96px; height:96px; border-radius:50%; }
+
+/* ================= TEMPLATE 2: MINIMAL LONDON ================= */
+.min-page{ width:100%; padding:44px 50px; color:#222; font-size:12.5px; }
+.min-header{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; }
+.min-cv-label{ font-family:'Lora',serif; font-size:30px; font-weight:700; letter-spacing:.04em; }
+.min-photo-wrap .photo-circle{ width:88px; height:88px; }
+.min-section{ margin-bottom:20px; }
+.min-section h4{ font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#222; border-bottom:1.5px solid #222; padding-bottom:5px; margin:0 0 10px; font-weight:700; }
+.min-row{ display:flex; gap:16px; margin-bottom:5px; }
+.min-key{ width:150px; flex:0 0 150px; color:#777; }
+.min-val{ flex:1; color:#222; }
+.min-entry{ display:flex; gap:16px; margin-bottom:12px; }
+.min-entry-dates{ width:150px; flex:0 0 150px; color:#777; font-size:12px; }
+.min-entry-body{ flex:1; }
+.min-entry-title{ font-weight:700; font-size:13px; }
+.min-entry-sub{ font-size:12.5px; color:#444; margin:1px 0 3px; }
+.min-entry-desc{ font-size:12px; color:#444; line-height:1.5; }
+.min-bullets{ margin:0; padding-left:16px; }
+.min-bullets li{ font-size:12px; color:#444; line-height:1.55; }
+.min-signature{ margin-top:30px; }
+.min-sig-date{ font-size:12px; color:#444; margin-bottom:22px; }
+.min-sig-name{ font-family:'Dancing Script', cursive; font-size:26px; color:#1e3d3f; border-top:1px solid #ccc; padding-top:4px; display:inline-block; min-width:220px; }
+
+/* ================= TEMPLATE 3: STUDENT BLUE ================= */
+#resume-student{ font-family:'Source Sans 3', sans-serif; }
+.stu-sidebar{ width:270px; flex:0 0 270px; background:#eef4fb; padding:30px 22px; }
+.stu-photo-wrap{ display:flex; justify-content:center; margin-bottom:18px; }
+.stu-photo-wrap .photo-circle{ width:100px; height:100px; border:3px solid #2f6fb0; }
+.stu-block{ margin-top:20px; }
+.stu-sidebar h4, .stu-main h4{ font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#2f6fb0; margin:0 0 10px; font-weight:700; }
+.stu-contact-item{ display:flex; gap:8px; align-items:center; font-size:12px; color:#333; margin-bottom:7px; word-break:break-word; }
+.stu-ico{ color:#2f6fb0; font-weight:700; width:16px; flex:0 0 16px; text-align:center; }
+.stu-plain-list{ list-style:none; margin:0; padding:0; }
+.stu-plain-list li{ font-size:12px; color:#333; margin-bottom:6px; padding-left:12px; position:relative; }
+.stu-plain-list li::before{ content:""; position:absolute; left:0; top:5px; width:5px; height:5px; background:#2f6fb0; border-radius:50%; }
+.stu-lang-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.stu-lang-name{ font-size:12px; color:#333; }
+.stu-dots{ display:flex; gap:3px; }
+.stu-dot{ width:8px; height:8px; border-radius:50%; background:#cdd9e8; display:inline-block; }
+.stu-dot.filled{ background:#2f6fb0; }
+.stu-entry{ margin-bottom:11px; }
+.stu-entry-title{ font-weight:700; font-size:12.5px; color:#1c3c5c; }
+.stu-entry-sub{ font-size:11.5px; color:#555; }
+.stu-main{ flex:1 1 auto; min-width:0; padding:30px 30px 30px 26px; }
+.stu-name{ font-family:'Lora',serif; font-size:28px; font-weight:700; color:#1c3c5c; line-height:1.1; }
+.stu-title{ font-size:12px; letter-spacing:.16em; color:#777; margin:2px 0 20px; }
+.stu-about{ font-size:12.5px; line-height:1.6; color:#333; }
+.stu-expect-label{ font-size:11.5px; font-weight:700; color:#333; margin-bottom:4px; }
+.stu-skill-row{ margin-bottom:9px; }
+.stu-skill-name{ font-size:12px; color:#333; margin-bottom:3px; }
+.stu-skill-bar{ height:6px; background:#e3ebf6; border-radius:3px; overflow:hidden; }
+.stu-skill-fill{ height:100%; background:#2f6fb0; border-radius:3px; }
+
+/* ================= TEMPLATE 4: EXECUTIVE MONO ================= */
+#resume-executive{ flex-direction:column; }
+.exec-header{ display:flex; justify-content:space-between; align-items:flex-start; padding:40px 44px 20px; border-bottom:1px solid #ddd; }
+.exec-title{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#888; margin-bottom:6px; }
+.exec-name{ font-family:'Lora',serif; font-size:30px; font-weight:700; color:#1a1a1a; letter-spacing:.02em; }
+.exec-photo-wrap .photo-circle{ width:84px; height:84px; }
+.exec-body{ display:flex; flex:1; }
+.exec-sidebar{ width:230px; flex:0 0 230px; padding:26px 30px 30px 44px; border-right:1px solid #eee; }
+.exec-main{ flex:1; padding:26px 44px 30px 34px; }
+.exec-sidebar h4, .exec-main h4{ font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#1a1a1a; margin:18px 0 10px; font-weight:700; }
+.exec-sidebar h4:first-child{ margin-top:0; }
+.exec-contact-item{ font-size:12px; color:#444; margin-bottom:6px; word-break:break-word; }
+.exec-list{ list-style:none; margin:0; padding:0; }
+.exec-list li{ font-size:12px; color:#333; margin-bottom:6px; padding-left:12px; position:relative; }
+.exec-list li::before{ content:"—"; position:absolute; left:0; top:0; color:#999; }
+.exec-summary{ font-size:12.5px; line-height:1.6; color:#333; }
+.exec-entry{ margin-bottom:16px; }
+.exec-entry-title{ font-size:12.5px; font-weight:700; letter-spacing:.04em; color:#1a1a1a; }
+.exec-entry-sub{ font-size:11.5px; color:#777; margin:1px 0 5px; }
+.exec-bullets{ margin:0; padding-left:16px; }
+.exec-bullets li{ font-size:12px; color:#333; line-height:1.55; }
 
 /* ================= PDF EDITOR TAB ================= */
 .pdf-wrap{ padding:12px 28px 40px; max-width:1200px; margin:0 auto; }

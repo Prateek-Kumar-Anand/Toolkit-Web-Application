@@ -21,8 +21,9 @@ let baseCanvas = null;         // committed working canvas
 let undoStack = [];            // array of dataURLs (previous committed states)
 
 let cropMode = false;
-let cropStart = null;   // {x,y} in canvas-wrap CSS pixel space
-let cropCurrent = null; // {x,y}
+let cropStart = null;    // {x,y} in canvas CSS pixel space
+let cropCurrent = null;  // {x,y}
+let isDragging = false;  // true only while the mouse button/touch is actually down
 
 const imgCanvas = document.getElementById('imgCanvas');
 const imgCtx = imgCanvas.getContext('2d');
@@ -319,6 +320,7 @@ function imgStartCrop(){
   cropMode = true;
   cropStart = null;
   cropCurrent = null;
+  isDragging = false;
   imgCropBox.style.display = 'none';
   imgCanvas.classList.remove('no-crop');
   document.getElementById('imgCropHint').style.display = 'block';
@@ -332,6 +334,7 @@ function imgCancelCrop(){
   cropMode = false;
   cropStart = null;
   cropCurrent = null;
+  isDragging = false;
   imgCropBox.style.display = 'none';
   imgCanvas.classList.add('no-crop');
   document.getElementById('imgCropHint').style.display = 'none';
@@ -393,25 +396,40 @@ function drawCropBox(){
 
 function cropPointerDown(e){
   if(!cropMode) return;
+  isDragging = true;
   cropStart = wrapPoint(e);
-  cropCurrent = cropStart;
+  cropCurrent = { x: cropStart.x, y: cropStart.y };
   drawCropBox();
   e.preventDefault();
 }
 function cropPointerMove(e){
-  if(!cropMode || !cropStart) return;
+  if(!cropMode || !isDragging) return;
+  // Safety net: mousemove also fires on plain hover with no button held.
+  // If the real mouseup was somehow missed (e.g. the button was released
+  // outside the browser window), treat a buttonless move as the drag
+  // having ended instead of letting it keep silently redefining the box.
+  if(e.type === 'mousemove' && e.buttons === 0){
+    isDragging = false;
+    return;
+  }
   cropCurrent = wrapPoint(e);
   drawCropBox();
   e.preventDefault();
 }
 function cropPointerUp(e){
-  if(!cropMode || !cropStart) return;
+  if(!cropMode || !isDragging) return;
+  isDragging = false;
   cropCurrent = wrapPoint(e);
   drawCropBox();
 }
 
 imgCanvasWrap.addEventListener('mousedown', cropPointerDown);
-imgCanvasWrap.addEventListener('mousemove', cropPointerMove);
+// mousemove/mouseup are bound on window rather than just the wrap, so a
+// drag keeps tracking correctly even if the cursor briefly leaves the
+// canvas mid-drag, or the button is released outside it. This is safe
+// because both handlers bail out immediately once isDragging is false,
+// so they never react to ordinary mouse movement elsewhere on the page.
+window.addEventListener('mousemove', cropPointerMove);
 window.addEventListener('mouseup', cropPointerUp);
 imgCanvasWrap.addEventListener('touchstart', cropPointerDown, { passive: false });
 imgCanvasWrap.addEventListener('touchmove', cropPointerMove, { passive: false });

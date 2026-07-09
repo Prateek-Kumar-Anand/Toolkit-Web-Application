@@ -7,7 +7,7 @@
 <meta name="description" content="Build a formatted resume, edit and compress PDFs, clean Excel files, unzip archives, edit images, and generate QR codes — all in your browser, no backend required.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="css/style.css">
 
@@ -102,9 +102,31 @@
 <!-- ================= TOOL 1: CV CREATION ================= -->
 <div class="view" id="view-resume">
   <div class="app">
-    <div class="form-panel">
+    <div class="form-panel" id="formPanel" data-tmpl="classic">
       <h1>Resume Builder</h1>
       <p class="sub">Fill in your details. The preview on the right updates live.</p>
+
+      <div class="section">
+        <h2>Choose a CV Template</h2>
+        <div class="tmpl-picker" id="tmplPicker">
+          <div class="tmpl-option active" data-tmpl-btn="classic" onclick="selectTemplate('classic')">
+            <div class="tmpl-swatch tmpl-swatch-classic"><span></span><span></span></div>
+            <div class="tmpl-option-label">Classic Teal</div>
+          </div>
+          <div class="tmpl-option" data-tmpl-btn="minimal" onclick="selectTemplate('minimal')">
+            <div class="tmpl-swatch tmpl-swatch-minimal"><span></span><span></span></div>
+            <div class="tmpl-option-label">Minimal London</div>
+          </div>
+          <div class="tmpl-option" data-tmpl-btn="student" onclick="selectTemplate('student')">
+            <div class="tmpl-swatch tmpl-swatch-student"><span></span><span></span></div>
+            <div class="tmpl-option-label">Student Blue</div>
+          </div>
+          <div class="tmpl-option" data-tmpl-btn="executive" onclick="selectTemplate('executive')">
+            <div class="tmpl-swatch tmpl-swatch-executive"><span></span><span></span></div>
+            <div class="tmpl-option-label">Executive Mono</div>
+          </div>
+        </div>
+      </div>
 
       <div class="section">
         <h2>Basic Info</h2>
@@ -117,12 +139,24 @@
           <div><label>Phone</label><input type="tel" id="f-phone" placeholder="+91 ..."></div>
         </div>
         <div class="row2">
-          <div><label>Location</label><input type="text" id="f-location" placeholder="City, State, Country"></div>
+          <div><label>Location / Address</label><input type="text" id="f-location" placeholder="City, State, Country"></div>
+          <div class="tmpl-field" data-tmpl="minimal"><label>Birthday</label><input type="text" id="f-birthday" placeholder="e.g. 5th January 1982"></div>
+        </div>
+        <div class="row2 tmpl-field" data-tmpl="classic">
           <div><label>University / Institute</label><input type="text" id="f-university" placeholder="e.g. DDU Gorakhpur University"></div>
+        </div>
+        <div class="row2 tmpl-field" data-tmpl="student executive">
+          <div><label>LinkedIn</label><input type="text" id="f-linkedin" placeholder="linkedin.com/in/you"></div>
         </div>
       </div>
 
-      <div class="section">
+      <div class="section tmpl-field" data-tmpl="minimal student executive">
+        <h2>Photo</h2>
+        <input type="file" id="f-photo" accept="image/*" onchange="handlePhotoUpload(event)">
+        <button class="add-btn" type="button" style="margin-top:8px;background:#a33;" onclick="clearPhoto()">Remove Photo</button>
+      </div>
+
+      <div class="section tmpl-field" data-tmpl="classic student executive">
         <h2>Core Skills</h2>
         <div id="skills-container"></div>
         <button class="add-btn" onclick="addSimpleLine('skills-container','skill')">+ Add Skill</button>
@@ -134,29 +168,64 @@
         <button class="add-btn" onclick="addSimpleLine('languages-container','language')">+ Add Language</button>
       </div>
 
-      <div class="section">
+      <div class="section tmpl-field" data-tmpl="minimal">
+        <h2>Computer Skills</h2>
+        <div id="computerskills-container"></div>
+        <button class="add-btn" onclick="addSimpleLine('computerskills-container','computer')">+ Add Computer Skill</button>
+      </div>
+
+      <div class="section tmpl-field" data-tmpl="minimal student">
+        <h2>Interests</h2>
+        <div id="interests-container"></div>
+        <button class="add-btn" onclick="addSimpleLine('interests-container','interest')">+ Add Interest</button>
+      </div>
+
+      <div class="section tmpl-field" data-tmpl="classic">
         <h2>Research Focus</h2>
         <textarea id="f-research-focus" placeholder="e.g. Plant Biotechnology, Molecular Virology..."></textarea>
       </div>
 
-      <div class="section">
-        <h2>Professional Profile</h2>
+      <div class="section tmpl-field" data-tmpl="classic student executive">
+        <h2 id="profileHeading">Professional Profile</h2>
         <textarea id="f-profile" placeholder="2-4 sentence summary..." style="min-height:100px;"></textarea>
       </div>
 
-      <div class="section">
+      <div class="section tmpl-field" data-tmpl="classic minimal student">
         <h2>Education</h2>
         <div id="education-container"></div>
         <button class="add-btn" onclick="addEducation()">+ Add Education</button>
       </div>
 
-      <div class="section">
+      <div class="section tmpl-field" data-tmpl="minimal executive">
+        <h2 id="workexpHeading">Work Experience</h2>
+        <div id="workexp-container"></div>
+        <button class="add-btn" onclick="addWorkExp()">+ Add Work Experience</button>
+      </div>
+
+      <div class="section tmpl-field" data-tmpl="student">
+        <h2>Organizations</h2>
+        <div id="organizations-container"></div>
+        <button class="add-btn" onclick="addOrganization()">+ Add Organization</button>
+      </div>
+
+      <div class="section tmpl-field" data-tmpl="student">
+        <h2>Achievements</h2>
+        <div id="achievements-container"></div>
+        <button class="add-btn" onclick="addAchievement()">+ Add Achievement</button>
+      </div>
+
+      <div class="section tmpl-field" data-tmpl="student">
+        <h2>Expectations</h2>
+        <textarea id="f-expectations" placeholder="e.g. A challenging yet fun environment to gain new techniques..."></textarea>
+      </div>
+
+      <div class="section tmpl-field" data-tmpl="classic">
         <h2>Certifications & Licenses</h2>
         <div id="certifications-container"></div>
         <button class="add-btn" onclick="addSimpleLine('certifications-container','certification')">+ Add Certification</button>
       </div>
 
-      <div class="section">
+      <div class="section tmpl-field" data-tmpl="classic">
         <h2>Research & Projects</h2>
         <div id="projects-container"></div>
         <button class="add-btn" onclick="addProject()">+ Add Project</button>
@@ -168,41 +237,161 @@
     <div class="preview-panel">
       <div class="page-shadow">
         <div class="page-frame" id="resume-frame">
-        <div id="resume">
+
+        <!-- TEMPLATE 1: Classic Teal Sidebar -->
+        <div id="resume-classic" class="resume-tpl">
           <div class="sidebar">
-            <div class="name" id="p-name">Your Name</div>
-            <div class="title" id="p-title">Your Title</div>
+            <div class="name" id="c-name">Your Name</div>
+            <div class="title" id="c-title">Your Title</div>
             <div class="contact-item">
               <div class="contact-label">Email</div>
-              <div class="contact-value" id="p-email">email@example.com</div>
+              <div class="contact-value" id="c-email">email@example.com</div>
             </div>
             <div class="contact-item">
               <div class="contact-label">Phone</div>
-              <div class="contact-value" id="p-phone">phone number</div>
+              <div class="contact-value" id="c-phone">phone number</div>
             </div>
             <h3>Core Skills</h3>
-            <ul id="p-skills"></ul>
+            <ul id="c-skills"></ul>
             <h3>Languages</h3>
-            <ul id="p-languages"></ul>
+            <ul id="c-languages"></ul>
             <h3>Research Focus</h3>
-            <div class="research-focus-text" id="p-research-focus"></div>
+            <div class="research-focus-text" id="c-research-focus"></div>
             <h3>Contact Info</h3>
             <div class="contact-item">
               <div class="contact-label">Location</div>
-              <div class="contact-value" id="p-location">Location</div>
+              <div class="contact-value" id="c-location">Location</div>
             </div>
             <div class="contact-item">
               <div class="contact-label">Studied At</div>
-              <div class="contact-value" id="p-university">University</div>
+              <div class="contact-value" id="c-university">University</div>
             </div>
           </div>
           <div class="main">
-            <div class="block"><h3>Professional Profile</h3><div class="profile-text" id="p-profile"></div></div>
-            <div class="block"><h3>Education</h3><div id="p-education"></div></div>
-            <div class="block"><h3>Certifications & Licenses</h3><ul class="cert-list" id="p-certifications"></ul></div>
-            <div class="block"><h3>Research & Projects</h3><div id="p-projects"></div></div>
+            <div class="block"><h3>Professional Profile</h3><div class="profile-text" id="c-profile"></div></div>
+            <div class="block"><h3>Education</h3><div id="c-education"></div></div>
+            <div class="block"><h3>Certifications & Licenses</h3><ul class="cert-list" id="c-certifications"></ul></div>
+            <div class="block"><h3>Research & Projects</h3><div id="c-projects"></div></div>
           </div>
         </div>
+
+        <!-- TEMPLATE 2: Minimal London -->
+        <div id="resume-minimal" class="resume-tpl">
+          <div class="min-page">
+            <div class="min-header">
+              <div class="min-cv-label">CV</div>
+              <div class="min-photo-wrap" id="m-photo-wrap"></div>
+            </div>
+            <div class="min-section">
+              <h4>Personal data</h4>
+              <div class="min-row"><div class="min-key">Name</div><div class="min-val" id="m-name">Your Name</div></div>
+              <div class="min-row"><div class="min-key">Birthday</div><div class="min-val" id="m-birthday"></div></div>
+              <div class="min-row"><div class="min-key">Address</div><div class="min-val" id="m-location"></div></div>
+              <div class="min-row"><div class="min-key">Phone</div><div class="min-val" id="m-phone"></div></div>
+              <div class="min-row"><div class="min-key">Email</div><div class="min-val" id="m-email"></div></div>
+            </div>
+            <div class="min-section">
+              <h4>Career</h4>
+              <div id="m-workexp"></div>
+            </div>
+            <div class="min-section">
+              <h4>Education</h4>
+              <div id="m-education"></div>
+            </div>
+            <div class="min-section">
+              <h4>Skills and Interests</h4>
+              <div class="min-row"><div class="min-key">Language skills</div><div class="min-val" id="m-languages"></div></div>
+              <div class="min-row"><div class="min-key">Computer skills</div><div class="min-val" id="m-computerskills"></div></div>
+              <div class="min-row"><div class="min-key">Interests</div><div class="min-val" id="m-interests"></div></div>
+            </div>
+            <div class="min-signature">
+              <div class="min-sig-date" id="m-sig-date"></div>
+              <div class="min-sig-name" id="m-sig-name"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TEMPLATE 3: Student Blue -->
+        <div id="resume-student" class="resume-tpl">
+          <div class="stu-sidebar">
+            <div class="stu-photo-wrap" id="s-photo-wrap"></div>
+            <div class="stu-contact">
+              <h4>Contact</h4>
+              <div class="stu-contact-item"><span class="stu-ico">✉</span><span id="s-email"></span></div>
+              <div class="stu-contact-item"><span class="stu-ico">☎</span><span id="s-phone"></span></div>
+              <div class="stu-contact-item"><span class="stu-ico">📍</span><span id="s-location"></span></div>
+              <div class="stu-contact-item" id="s-linkedin-row"><span class="stu-ico">in</span><span id="s-linkedin"></span></div>
+            </div>
+            <div class="stu-block">
+              <h4>Languages</h4>
+              <div id="s-languages"></div>
+            </div>
+            <div class="stu-block">
+              <h4>Interests</h4>
+              <ul class="stu-plain-list" id="s-interests"></ul>
+            </div>
+            <div class="stu-block">
+              <h4>Achievements</h4>
+              <div id="s-achievements"></div>
+            </div>
+          </div>
+          <div class="stu-main">
+            <div class="stu-name" id="s-name">Your Name</div>
+            <div class="stu-title" id="s-title">STUDENT</div>
+            <div class="stu-block">
+              <h4>About Me</h4>
+              <div class="stu-about" id="s-profile"></div>
+            </div>
+            <div class="stu-block">
+              <h4>Skills</h4>
+              <div id="s-skills"></div>
+            </div>
+            <div class="stu-block">
+              <h4>Education</h4>
+              <div id="s-education"></div>
+            </div>
+            <div class="stu-block">
+              <h4>Organizations</h4>
+              <div id="s-organizations"></div>
+            </div>
+            <div class="stu-block">
+              <h4>Expectations</h4>
+              <div class="stu-expect-label">Learning Experience</div>
+              <div class="stu-about" id="s-expectations"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TEMPLATE 4: Executive Mono -->
+        <div id="resume-executive" class="resume-tpl">
+          <div class="exec-header">
+            <div class="exec-heading">
+              <div class="exec-title" id="e-title">PROJECT MANAGER</div>
+              <div class="exec-name" id="e-name">YOUR NAME</div>
+            </div>
+            <div class="exec-photo-wrap" id="e-photo-wrap"></div>
+          </div>
+          <div class="exec-body">
+            <div class="exec-sidebar">
+              <h4>Contact</h4>
+              <div class="exec-contact-item" id="e-location"></div>
+              <div class="exec-contact-item" id="e-phone"></div>
+              <div class="exec-contact-item" id="e-email"></div>
+              <div class="exec-contact-item" id="e-linkedin"></div>
+              <h4>Skills</h4>
+              <ul class="exec-list" id="e-skills"></ul>
+              <h4>Languages</h4>
+              <ul class="exec-list" id="e-languages"></ul>
+            </div>
+            <div class="exec-main">
+              <h4>Summary</h4>
+              <div class="exec-summary" id="e-profile"></div>
+              <h4>Work Experience</h4>
+              <div id="e-workexp"></div>
+            </div>
+          </div>
+        </div>
+
         </div>
       </div>
       <div class="page-fit-note" id="pageFitNote"></div>
