@@ -1,67 +1,148 @@
-# Resume, PDF, Excel & Zip Toolkit
+<div align="center">
 
-A single-page, fully client-side web app with four tools in one:
+# 🎓 Student Toolkit
 
-1. **CV Creation** — fill a form, get a live preview, download a formatted resume PDF that always fits on one page
-2. **PDF Editing** — rotate, delete, reorder, merge, extract pages, and watermark PDFs
-3. **Excel Cleaning** — *(coming soon)* clean up messy spreadsheets
-4. **.zip operation** — unzip an archive, preview what's inside, and download only the files you pick
+**Seven everyday tools, one page, zero servers.**
 
-No backend, no build step, no server. Everything runs in the browser and nothing you upload ever leaves your machine.
+Build a résumé · Edit &amp; compress PDFs · Clean a spreadsheet · Unzip an archive · Touch up a photo · Generate a QR code
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-c9a24b.svg)](LICENSE)
+![Backend](https://img.shields.io/badge/backend-none-1e3d3f.svg)
+![Runs](https://img.shields.io/badge/runs-100%25%20in%20your%20browser-1e3d3f.svg)
+![Build Step](https://img.shields.io/badge/build%20step-none-1e3d3f.svg)
+
+</div>
 
 ---
 
-## Live Demo
+## Overview
 
-Once deployed on GitHub Pages (see [Deployment](#deployment) below), your app will be live at:
+**Student Toolkit** is a single HTML page that quietly does the job of seven different apps. Everything — every PDF page you rotate, every cell you clean, every photo you crop — is processed **locally in your browser**. Nothing is uploaded, nothing is stored on a server, and there's nothing to install. Open `index.html` and you're already using it.
 
-```
-https://<your-username>.github.io/<repo-name>/
-```
+It opens on a home screen of large, clearly-labeled tool cards rather than a crowded menu of tabs. Pick a tool, and a slim top bar appears so you can jump between the other six without ever losing your place.
+
+|  | Tool | What it does |
+|---|---|---|
+| 📄 | **CV Creation** | Fill a form, watch a live preview, download a resume that always fits one page |
+| 🛠 | **PDF Editing** | Rotate, delete, reorder, merge, watermark, and insert image pages |
+| 📊 | **Excel Cleaner** | Strip blank rows/columns, trim whitespace, normalize headers, dedupe |
+| 🗜 | **.zip Operation** | Preview an archive's contents and download only what you pick |
+| 🖼 | **Image Editor** | Crop, resize, rotate/flip, adjust brightness/contrast/saturation, filter |
+| 🗃 | **PDF Compressor** | Shrink a PDF's file size with an adjustable quality/size trade-off |
+| 🔳 | **QR Code Tool** | Generate a styled QR code, or scan one via upload or live camera |
+
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Design](#design)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started-local-development)
+- [Deployment](#deployment)
+- [Known Limitations](#known-limitations)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
+## Features
+
+### 📄 CV Creation
+
+A form-based resume builder with a live, styled preview — a teal sidebar (contact, skills, languages, research focus) beside a main column (profile, education, certifications, projects).
+
+- Add or remove entries on the fly for skills, languages, certifications, education, and projects
+- The preview sits inside a fixed A4 frame and **always fits exactly one page** — long content is scaled down automatically rather than spilling onto a second page
+- **Get CV** exports that exact same frame to PDF, pixel-for-pixel
+
+**Using it:** fill in the fields on the left, watch the preview update on the right (a small note appears if it had to auto-shrink to fit), then click **Get CV**.
+
+### 🛠 PDF Editing
+
+Open any PDF and see every page as a thumbnail you can act on directly.
+
+- **Rotate** pages in 90° steps, **delete** pages, **reorder** with move left/right
+- **Merge** another PDF's pages into the current set
+- **Add Image** — drop in a PNG/JPEG as a new page, scaled and centered; works even before opening a PDF, so you can build one from scratch out of photos alone
+- Per-page checkbox to include/exclude from the final export — a quick way to extract a subset of pages
+- Optional diagonal **watermark** stamped across every page on export
+
+> This is *structural* editing — rotate, delete, reorder, merge, watermark, insert. It doesn't rewrite existing text inside a PDF; that needs OCR/layout reconstruction, which is out of scope for a client-side tool.
+
+**Using it:** **Open PDF** → adjust pages with the `←` `→` `⟳` `✕` controls and checkboxes → optionally **Merge Another PDF** or **Add Image** → optionally set a watermark → **Download Edited PDF**.
+
+### 📊 Excel Cleaner
+
+Upload a `.xlsx`, `.xls`, or `.csv`, choose a sheet, and tidy it up with one-click options:
+
+- Remove blank rows / remove blank columns
+- Trim stray whitespace
+- Normalize headers
+- Remove duplicate rows
+
+A live table preview (up to 300 rows) shows the result before you commit. The download matches your original format — `.csv` in, cleaned `.csv` out; `.xlsx` in, cleaned `.xlsx` out.
+
+**Using it:** **Open File** → pick a sheet if there's more than one → tick the cleaning steps you want → **Apply Cleaning** → **Download File**.
+
+### 🗜 .zip Operation
+
+Open an archive and see everything inside it — filename, path, and size — without extracting a thing to disk.
+
+- Filter the list by filename to find what you need fast
+- Tick individual files, or **Select All**
+- One file ticked downloads as-is; multiple files bundle into a fresh `selected-files.zip` with the original folder structure preserved
+- Per-row **Download** button grabs a single file instantly, no ticking required
+
+**Using it:** **Open .zip** → filter/tick what you want → **Download Selected**, or use a row's own **Download** button.
+
+### 🖼 Image Editor
+
+A full canvas-based photo editor with no external image library — crop, resize, rotate/flip, tone adjustments, and quick filters, with undo at every step.
+
+- **Crop** — drag to select an area, then apply
+- **Resize** — set width/height with optional locked aspect ratio
+- **Rotate** left/right, **flip** horizontal/vertical
+- **Adjust** — brightness, contrast, and saturation sliders with live preview
+- **Quick filters** — grayscale, sepia, invert
+- **Undo** steps back through every destructive edit
+- Export as **PNG**, **JPEG**, or **WEBP** (JPEG/WEBP expose a quality slider)
+
+**Using it:** **Open Image** → make your edits in any order → pick an export format → **Download Image**.
+
+### 🗃 PDF Compressor
+
+Shrinks a PDF by re-rendering each page to a canvas at a chosen resolution, re-encoding it as JPEG, and rebuilding a new PDF from those images at the original page size.
+
+- Four presets — **Low** (~150 DPI), **Recommended** (~110 DPI), **High** (~72 DPI), or **Custom** (your own DPI + JPEG quality)
+- Before/after size comparison with the percentage reduction shown
+
+> Because pages become images, the resulting text is no longer selectable or searchable. This works well for scans and image-heavy PDFs, and less well when you need to keep real, searchable text.
+
+**Using it:** **Open PDF** → pick a compression level (or dial in a custom DPI/quality) → **Compress PDF** → **Download Compressed PDF**.
+
+### 🔳 QR Code Tool
+
+Two modes in one tab: **Generate** and **Scan**.
+
+**Generate**
+- Turn any link or block of text into a QR code
+- Adjust size, foreground/background color, and error-correction level (L/M/Q/H)
+- Download as PNG
+
+**Scan**
+- Decode a QR code from an uploaded image, or point your camera at one for live decoding
+- Copy the decoded text, or open it directly if it's a link
+
+**Using it:** switch between **🔳 Generate** and **📷 Scan** at the top of the tool. To generate, type your content, tweak the look, and download. To scan, upload an image or start the camera — the decoded content appears automatically.
 
 ---
 
 ## Design
 
-The app opens on a **home screen with large tool buttons** (CV Creation, PDF Editing, Excel Cleaning, .zip operation) — no hunting for tiny tabs. Clicking one takes you into that tool, with a slim top bar (← Home + quick tab switches) so you can jump between tools without going back every time. Layout is responsive down to mobile.
-
-## Features
-
-### 1. CV Creation
-- Form-based resume builder with a live, styled preview
-- Two-column layout: teal sidebar (contact, skills, languages, research focus) + main column (profile, education, certifications, projects)
-- Add/remove entries dynamically for skills, languages, certifications, education, and projects
-- The preview lives inside a fixed A4-size window and **always fits on exactly one page** — if your content would run long, it's automatically (and legibly) scaled down to fit rather than spilling onto a second page
-- One-click **Get CV** button exports that same single-page preview to PDF (pixel-for-pixel, since the export captures the exact same fixed-size frame)
-
-### 2. PDF Editing
-- Open any PDF and see every page as a thumbnail
-- **Rotate** individual pages in 90° steps
-- **Delete** individual pages
-- **Reorder** pages with move left / move right controls
-- **Merge** another PDF's pages into the current working set
-- **Add Image** — insert a PNG/JPEG as a brand-new page (scaled to fit, centered, aspect ratio preserved); works even before opening a PDF, so you can build one from scratch out of just photos/scans
-- **Selective export** — checkbox per page to include/exclude from the final download (handy for extracting a subset of pages)
-- **Watermark** — optional text stamped diagonally across every page on export, including any pages added from images
-- Download the result as a single new PDF
-
-> Note: this is *structural* PDF editing (rotate/delete/reorder/merge/watermark/insert-image). It does not rewrite existing text inside a PDF — that requires OCR/layout reconstruction and is out of scope for a client-side tool.
-
-### 3. Excel Cleaning (planned)
-- Upload a messy `.xlsx` / `.csv`
-- Remove blank rows/columns, trim whitespace, normalize headers, dedupe rows
-- Download the cleaned file
-- Not yet implemented — the tab currently shows a placeholder. Logic will live in `js/excel-cleaner.js`, using the already-included [SheetJS](https://sheetjs.com/) library.
-
-### 4. .zip operation
-- Open any `.zip` archive — every file inside is listed with an icon, its path, and its size
-- Filter the list by filename to quickly find what you need
-- Tick individual files (or **Select All**) to choose what to keep
-- **Download**:
-  - one file ticked → downloads that file as-is
-  - multiple files ticked → bundled into a fresh `selected-files.zip` (original folder structure preserved)
-- Per-row **Download** button for grabbing a single file immediately without ticking anything
-- Everything happens in-browser via [JSZip](https://stuk.github.io/jszip/) — the archive is never uploaded anywhere
+The interface leans editorial rather than "app-like" — a deep teal (`#1e3d3f`) and warm gold (`#c9a24b`) palette, `Lora` serif for headings paired with `Source Sans 3` for everything else, on a soft off-white background. The home screen favors a handful of large, legible tool cards over a dense toolbar, and every tool view keeps a slim, persistent top bar for one-click navigation back home or across tools. The whole layout is responsive down to mobile, including the top bar, which measures and adapts its own height as it wraps on narrower screens.
 
 ---
 
@@ -69,16 +150,19 @@ The app opens on a **home screen with large tool buttons** (CV Creation, PDF Edi
 
 Pure static frontend — no framework, no bundler, no backend:
 
-| Purpose            | Library                                                                 |
-|--------------------|--------------------------------------------------------------------------|
-| HTML → PDF export  | [html2canvas](https://github.com/niklasvh/html2canvas) + [jsPDF](https://github.com/parallax/jsPDF) |
-| PDF editing        | [pdf-lib](https://pdf-lib.js.org/)                                       |
-| PDF page rendering | [pdf.js](https://mozilla.github.io/pdf.js/)                              |
-| Excel parsing      | [SheetJS (xlsx)](https://sheetjs.com/) — loaded, not yet wired up        |
-| Zip read/write     | [JSZip](https://stuk.github.io/jszip/)                                   |
-| Fonts              | Google Fonts (Lora + Source Sans 3)                                      |
+| Purpose | Library |
+|---|---|
+| HTML → PDF export | [html2canvas](https://github.com/niklasvh/html2canvas) + [jsPDF](https://github.com/parallax/jsPDF) |
+| PDF editing & compression rebuild | [pdf-lib](https://pdf-lib.js.org/) |
+| PDF page rendering | [pdf.js](https://mozilla.github.io/pdf.js/) |
+| Spreadsheet parsing/writing | [SheetJS (xlsx)](https://sheetjs.com/) |
+| Zip read/write | [JSZip](https://stuk.github.io/jszip/) |
+| QR code generation | [qrcodejs](https://davidshimjs.github.io/qrcodejs/) |
+| QR code scanning | [jsQR](https://github.com/cozmo/jsQR) |
+| Image editing | Native Canvas API — no library needed |
+| Fonts | Google Fonts (Lora + Source Sans 3) |
 
-All libraries are loaded from CDN (cdnjs) in `index.html` — nothing to install.
+All libraries load from CDN in `index.html` — nothing to install.
 
 ---
 
@@ -86,18 +170,20 @@ All libraries are loaded from CDN (cdnjs) in `index.html` — nothing to install
 
 ```
 toolkit/
-├── index.html              # Main HTML shell — all 4 tabs, loads CSS/JS
+├── index.html              # Main HTML shell — home screen + all 7 tool views
 ├── css/
-│   └── style.css           # All styling (nav, resume layout, PDF editor UI, zip tool UI)
+│   └── style.css           # All styling: theme, layout, and every tool's UI
 ├── js/
-│   ├── tabs.js             # Tab-switching logic
-│   ├── resume.js           # CV Creation module (incl. one-page auto-fit)
-│   ├── pdf-editor.js       # PDF Editing module
-│   ├── excel-cleaner.js    # Excel Cleaning module (placeholder)
-│   └── zip-tool.js         # .zip operation module
-├── assets/                 # (empty — for future logos/images)
+│   ├── tabs.js              # View switching + top bar behavior
+│   ├── resume.js            # CV Creation (incl. one-page auto-fit)
+│   ├── pdf-editor.js        # PDF Editing
+│   ├── excel-cleaner.js      # Excel Cleaner
+│   ├── zip-tool.js           # .zip Operation
+│   ├── image-editor.js       # Image Editor
+│   ├── pdf-compressor.js     # PDF Compressor
+│   ├── qr-code.js            # QR Code Tool (generate + scan)
+│   └── file-converter.js     # Standalone format-conversion module — not yet wired into index.html
 ├── LICENSE
-├── .gitignore
 └── README.md
 ```
 
@@ -105,18 +191,18 @@ toolkit/
 
 ## Getting Started (Local Development)
 
-No build tools needed. Just serve the folder statically.
+No build tools needed — just serve the folder statically.
 
 **Option A — Open directly**
 ```bash
 git clone https://github.com/<your-username>/<repo-name>.git
 cd <repo-name>
 ```
-Then double-click `index.html`, or open it in your browser via `File > Open`.
+Then double-click `index.html`, or open it via your browser's `File > Open`.
 
-> Important: `index.html` must sit at the **root** of your repo (same level as `README.md`), not inside a subfolder — otherwise GitHub Pages won't find it and you'll get a blank/404 page. If you downloaded this as a zip, make sure you extract its contents directly into your repo root, not into a nested folder.
+> `index.html` needs to sit at the **root** of your repo, alongside `README.md` — not nested inside a subfolder — or GitHub Pages won't find it. If you're starting from a downloaded zip, extract its contents directly into your repo root.
 
-> Some browsers restrict certain features (like file reading) when opening `index.html` directly via `file://`. If anything behaves oddly, use Option B instead.
+> Some browsers restrict file-reading APIs when opening `index.html` straight from `file://`. If a tool behaves oddly, use Option B instead.
 
 **Option B — Local server (recommended)**
 ```bash
@@ -126,85 +212,56 @@ python3 -m http.server 8000
 # or Node (npx, no install needed)
 npx serve .
 ```
-Then visit `http://localhost:8000` in your browser.
+Then visit `http://localhost:8000`.
 
 ---
 
 ## Deployment
 
-This app is 100% static, so **GitHub Pages** is the simplest way to deploy it — no build step, no config files.
+The app is 100% static, so **GitHub Pages** is the simplest way to host it — no build step, no config.
 
-### Steps:
-1. If you're starting from the downloaded zip, extract it and make sure `index.html`, `css/`, `js/`, `README.md` etc. are directly inside your project folder — not nested one level deeper inside another folder of the same name.
-2. Push this repo to GitHub:
+1. Make sure `index.html`, `css/`, `js/`, and `README.md` sit directly in your project folder, not nested one level deeper.
+2. Push to GitHub:
    ```bash
    git init
    git add .
-   git commit -m "Initial commit: resume, pdf, excel toolkit"
+   git commit -m "Initial commit: student toolkit"
    git branch -M main
    git remote add origin https://github.com/<your-username>/<repo-name>.git
    git push -u origin main
    ```
-3. On GitHub, go to your repo → **Settings** → **Pages**.
-4. Under **Build and deployment** → **Source**, select **Deploy from a branch**.
-5. Choose branch `main` and folder `/ (root)`, then **Save**.
-6. Wait a minute, then your app will be live at:
+3. On GitHub: **Settings → Pages → Build and deployment → Source → Deploy from a branch**.
+4. Choose branch `main`, folder `/ (root)`, then **Save**.
+5. Your app goes live at:
    ```
    https://<your-username>.github.io/<repo-name>/
    ```
 
-That's it — every time you push to `main`, GitHub Pages redeploys automatically.
-
----
-
-## Usage Guide
-
-### CV Creation
-1. Fill in the form fields on the left (name, contact info, skills, education, etc.)
-2. Watch the preview on the right update live — it always shows exactly one page; if your content is long, it auto-shrinks slightly to keep fitting (a small note appears under the preview when this happens)
-3. Click **Get CV (Download PDF)** to download your resume
-
-### PDF Editing
-1. Click **Open PDF** and choose a file — every page appears as a thumbnail
-2. Use the controls on each page:
-   - `←` / `→` — reorder
-   - `⟳` — rotate 90°
-   - `✕` — delete
-   - checkbox (top-left of thumbnail) — include/exclude from export
-3. Optionally click **+ Merge Another PDF** to append another file's pages
-4. Optionally click **+ Add Image** to insert a PNG/JPEG as a new page (works even without opening a PDF first, if you want to build one purely from images)
-5. Optionally type text into the **Watermark** box
-6. Click **Download Edited PDF**
-
-### Excel Cleaning
-Not yet available — check back after this module is implemented.
-
-### .zip operation
-1. Click **Open .zip** and choose an archive — every file inside is listed
-2. Optionally type in the filter box to narrow the list by filename
-3. Tick the files you want (or click **Select All**)
-4. Click **Download Selected** — a single ticked file downloads as-is, multiple files download bundled as `selected-files.zip`
-5. Or click the **Download** button on any single row to grab just that file right away
+Every push to `main` redeploys automatically.
 
 ---
 
 ## Known Limitations
 
-- PDF editing is page-level only (no in-place text editing of existing PDF content)
-- **Add Image** only accepts PNG and JPEG (pdf-lib's supported embed formats) — other formats like WEBP or GIF aren't supported and will show an error
-- Very large PDFs (100+ pages) may render thumbnails slowly since everything happens client-side
-- Resume PDF export uses an image-based render (html2canvas), so exported text isn't selectable — this is a common tradeoff for pixel-accurate custom layouts in the browser
-- Very long resume content is auto-shrunk to keep everything on one page; extremely long content (many projects/education entries) can end up quite small — trimming content is still the best way to keep it readable
-- The .zip tool reads standard, non-encrypted .zip archives — password-protected zips aren't supported
-- No persistence between sessions yet — refreshing the page clears the resume form, any loaded PDFs, and any opened .zip
+- PDF editing is page-level only — no in-place editing of existing text inside a PDF
+- **Add Image** (in PDF Editing) only accepts PNG and JPEG; other formats show an error
+- Very large PDFs (100+ pages) may render thumbnails slowly, since everything happens client-side
+- Resume PDF export is image-based (html2canvas), so exported text isn't selectable — a common trade-off for pixel-accurate custom layouts in the browser
+- Very long resume content is auto-shrunk to fit one page; extremely long content can end up quite small
+- The .zip tool reads standard, non-encrypted archives — password-protected zips aren't supported
+- PDF Compressor makes pages image-based, so compressed output loses selectable/searchable text
+- `file-converter.js` exists in the repo but isn't currently linked from `index.html`
+- No persistence between sessions — refreshing clears the resume form and any loaded PDF, spreadsheet, archive, or image
+
+---
 
 ## Roadmap
 
-- [ ] Implement Excel cleaning module (blank row/column removal, header normalization, dedupe)
-- [ ] Add save/load of resume form data as JSON (import/export drafts)
+- [ ] Wire up the file conversion module (images, audio → WAV, and data files via the existing SheetJS integration)
+- [ ] Save/load resume form data as JSON (import/export drafts)
 - [ ] Drag-and-drop page reordering in the PDF editor
-- [ ] Multiple resume templates to choose from
-- [ ] Split PDF into separate single-page downloads
+- [ ] Multiple resume templates
+- [ ] Split a PDF into separate single-page downloads
 
 ---
 
