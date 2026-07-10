@@ -19,7 +19,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 </head>
 <body>
 
@@ -125,6 +125,18 @@
             <div class="tmpl-swatch tmpl-swatch-executive"><span></span><span></span></div>
             <div class="tmpl-option-label">Executive Mono</div>
           </div>
+          <div class="tmpl-option" data-tmpl-btn="social" onclick="selectTemplate('social')">
+            <div class="tmpl-swatch tmpl-swatch-social"><span></span><span></span></div>
+            <div class="tmpl-option-label">Grey Slate</div>
+          </div>
+          <div class="tmpl-option" data-tmpl-btn="corporate" onclick="selectTemplate('corporate')">
+            <div class="tmpl-swatch tmpl-swatch-corporate"><span></span><span></span></div>
+            <div class="tmpl-option-label">Corporate Blue</div>
+          </div>
+          <div class="tmpl-option" data-tmpl-btn="bold" onclick="selectTemplate('bold')">
+            <div class="tmpl-swatch tmpl-swatch-bold"><span></span><span></span></div>
+            <div class="tmpl-option-label">Bold Angle</div>
+          </div>
         </div>
       </div>
 
@@ -150,13 +162,13 @@
         </div>
       </div>
 
-      <div class="section tmpl-field" data-tmpl="minimal student executive">
+      <div class="section tmpl-field" data-tmpl="minimal student executive social corporate bold">
         <h2>Photo</h2>
         <input type="file" id="f-photo" accept="image/*" onchange="handlePhotoUpload(event)">
         <button class="add-btn" type="button" style="margin-top:8px;background:#a33;" onclick="clearPhoto()">Remove Photo</button>
       </div>
 
-      <div class="section tmpl-field" data-tmpl="classic student executive">
+      <div class="section tmpl-field" data-tmpl="classic student executive social corporate bold">
         <h2>Core Skills</h2>
         <div id="skills-container"></div>
         <button class="add-btn" onclick="addSimpleLine('skills-container','skill')">+ Add Skill</button>
@@ -180,23 +192,23 @@
         <button class="add-btn" onclick="addSimpleLine('interests-container','interest')">+ Add Interest</button>
       </div>
 
-      <div class="section tmpl-field" data-tmpl="classic">
-        <h2>Research Focus</h2>
+      <div class="section tmpl-field" data-tmpl="classic social">
+        <h2 id="researchHeading">Research Focus</h2>
         <textarea id="f-research-focus" placeholder="e.g. Plant Biotechnology, Molecular Virology..."></textarea>
       </div>
 
-      <div class="section tmpl-field" data-tmpl="classic student executive">
+      <div class="section tmpl-field" data-tmpl="classic student executive social corporate bold">
         <h2 id="profileHeading">Professional Profile</h2>
         <textarea id="f-profile" placeholder="2-4 sentence summary..." style="min-height:100px;"></textarea>
       </div>
 
-      <div class="section tmpl-field" data-tmpl="classic minimal student">
+      <div class="section tmpl-field" data-tmpl="classic minimal student social corporate bold">
         <h2>Education</h2>
         <div id="education-container"></div>
         <button class="add-btn" onclick="addEducation()">+ Add Education</button>
       </div>
 
-      <div class="section tmpl-field" data-tmpl="minimal executive">
+      <div class="section tmpl-field" data-tmpl="minimal executive social corporate bold">
         <h2 id="workexpHeading">Work Experience</h2>
         <div id="workexp-container"></div>
         <button class="add-btn" onclick="addWorkExp()">+ Add Work Experience</button>
@@ -219,7 +231,7 @@
         <textarea id="f-expectations" placeholder="e.g. A challenging yet fun environment to gain new techniques..."></textarea>
       </div>
 
-      <div class="section tmpl-field" data-tmpl="classic">
+      <div class="section tmpl-field" data-tmpl="classic corporate">
         <h2>Certifications & Licenses</h2>
         <div id="certifications-container"></div>
         <button class="add-btn" onclick="addSimpleLine('certifications-container','certification')">+ Add Certification</button>
@@ -389,6 +401,96 @@
               <h4>Work Experience</h4>
               <div id="e-workexp"></div>
             </div>
+          </div>
+        </div>
+
+        <!-- TEMPLATE 5: Grey Slate (social work style) -->
+        <div id="resume-social" class="resume-tpl">
+          <div class="soc-page">
+            <div class="soc-header">
+              <div class="soc-photo-wrap" id="so-photo-wrap"></div>
+              <div class="soc-heading">
+                <div class="soc-name" id="so-name">Your Name</div>
+                <div class="soc-title" id="so-title">Your Title</div>
+              </div>
+            </div>
+            <div class="soc-body">
+              <div class="soc-sidebar">
+                <h4>Contact</h4>
+                <div class="soc-contact-item"><span class="soc-label">Address</span><span id="so-location"></span></div>
+                <div class="soc-contact-item"><span class="soc-label">Phone</span><span id="so-phone"></span></div>
+                <div class="soc-contact-item"><span class="soc-label">Email</span><span id="so-email"></span></div>
+                <h4 id="soc-researchHeading">Professional</h4>
+                <div class="soc-text" id="so-research-focus"></div>
+                <h4>Skills</h4>
+                <ul class="soc-list" id="so-skills"></ul>
+                <h4>Academic</h4>
+                <div id="so-education"></div>
+                <h4>References</h4>
+                <div class="soc-text">Available on request</div>
+              </div>
+              <div class="soc-main">
+                <h4 id="soc-profileHeading">Profile</h4>
+                <div class="soc-text" id="so-profile"></div>
+                <h4 id="soc-workexpHeading">Career</h4>
+                <div id="so-workexp"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TEMPLATE 6: Corporate Blue -->
+        <div id="resume-corporate" class="resume-tpl">
+          <div class="corp-page">
+            <div class="corp-header">
+              <div class="corp-photo-wrap" id="co-photo-wrap"></div>
+              <div class="corp-name" id="co-name">Your Name</div>
+            </div>
+            <div class="corp-body">
+              <div class="corp-sidebar">
+                <h4>Contact</h4>
+                <div class="corp-contact-item" id="co-location"></div>
+                <div class="corp-contact-item" id="co-phone"></div>
+                <div class="corp-contact-item" id="co-email"></div>
+                <h4>Education</h4>
+                <div id="co-education"></div>
+                <h4>Certifications</h4>
+                <ul class="corp-list" id="co-certifications"></ul>
+                <h4>Skills</h4>
+                <ul class="corp-list" id="co-skills"></ul>
+              </div>
+              <div class="corp-main">
+                <h4 id="corp-profileHeading">Professional Summary</h4>
+                <div class="corp-text" id="co-profile"></div>
+                <h4 id="corp-workexpHeading">Work History</h4>
+                <div id="co-workexp"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TEMPLATE 7: Bold Angle -->
+        <div id="resume-bold" class="resume-tpl">
+          <div class="bld-sidebar">
+            <div class="bld-photo-wrap" id="bo-photo-wrap"></div>
+            <h4>Contact Details</h4>
+            <div class="bld-contact-item" id="bo-email"></div>
+            <div class="bld-contact-item" id="bo-phone"></div>
+            <div class="bld-contact-item" id="bo-location"></div>
+            <h4>Education</h4>
+            <div id="bo-education"></div>
+            <h4>Skills</h4>
+            <ul class="bld-list" id="bo-skills"></ul>
+          </div>
+          <div class="bld-main">
+            <div class="bld-name" id="bo-name">Your Name</div>
+            <div class="bld-title" id="bo-title">Your Title</div>
+            <h4 id="bld-profileHeading">Summary</h4>
+            <div class="bld-text" id="bo-profile"></div>
+            <h4 id="bld-workexpHeading">Work Experience</h4>
+            <div id="bo-workexp"></div>
+            <h4>References</h4>
+            <div class="bld-text">References available upon request.</div>
           </div>
         </div>
 

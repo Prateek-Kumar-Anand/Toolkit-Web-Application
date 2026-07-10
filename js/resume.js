@@ -12,8 +12,9 @@ function uid(){ return 'id' + (counter++); }
 let currentTemplate = 'classic';
 let photoDataUrl = null;
 
-const PROFILE_HEADING = { classic: 'Professional Profile', student: 'About Me', executive: 'Summary' };
-const WORKEXP_HEADING = { minimal: 'Career', executive: 'Work Experience' };
+const PROFILE_HEADING = { classic: 'Professional Profile', student: 'About Me', executive: 'Summary', social: 'Profile', corporate: 'Professional Summary', bold: 'Summary' };
+const WORKEXP_HEADING = { minimal: 'Career', executive: 'Work Experience', social: 'Career', corporate: 'Work History', bold: 'Work Experience' };
+const RESEARCH_HEADING = { classic: 'Research Focus', social: 'Professional' };
 
 /* ------------------------------------------------------------
    TEMPLATE SWITCHING
@@ -38,6 +39,8 @@ function selectTemplate(name){
   if(profileHeading) profileHeading.textContent = PROFILE_HEADING[name] || 'Professional Profile';
   const workexpHeading = document.getElementById('workexpHeading');
   if(workexpHeading) workexpHeading.textContent = WORKEXP_HEADING[name] || 'Work Experience';
+  const researchHeading = document.getElementById('researchHeading');
+  if(researchHeading) researchHeading.textContent = RESEARCH_HEADING[name] || 'Research Focus';
 
   renderResume();
 }
@@ -68,6 +71,7 @@ function photoHtml(shape){
   }
   return `<div class="photo-placeholder photo-${shape}">Photo</div>`;
 }
+
 
 /* ------------------------------------------------------------
    SIMPLE REPEATERS (skills / languages / computer skills / interests / certs)
@@ -288,6 +292,9 @@ function renderResume(){
   else if(currentTemplate === 'minimal') renderMinimal();
   else if(currentTemplate === 'student') renderStudent();
   else if(currentTemplate === 'executive') renderExecutive();
+  else if(currentTemplate === 'social') renderSocial();
+  else if(currentTemplate === 'corporate') renderCorporate();
+  else if(currentTemplate === 'bold') renderBold();
   fitResumeToOnePage();
 }
 
@@ -494,6 +501,125 @@ function renderExecutive(){
       <div class="exec-entry-title">${escapeHtml(w.position).toUpperCase()}</div>
       <div class="exec-entry-sub">${escapeHtml(w.company)}${w.location ? ', ' + escapeHtml(w.location) : ''}${w.dates ? ' | ' + escapeHtml(w.dates) : ''}</div>
       <ul class="exec-bullets">${bulletsHtml(w.desc)}</ul>
+    `;
+    weOut.appendChild(div);
+  });
+}
+
+/* ---------- TEMPLATE 5: Grey Slate (social work style) ---------- */
+function renderSocial(){
+  document.getElementById('so-name').textContent = val('f-name') || 'Your Name';
+  document.getElementById('so-title').textContent = val('f-title') || 'Your Title';
+  document.getElementById('so-photo-wrap').innerHTML = photoHtml('square');
+  document.getElementById('so-location').textContent = val('f-location');
+  document.getElementById('so-phone').textContent = val('f-phone');
+  document.getElementById('so-email').textContent = val('f-email');
+  document.getElementById('so-research-focus').textContent = val('f-research-focus');
+  document.getElementById('so-profile').textContent = val('f-profile');
+
+  fillListInto('skills-container', document.getElementById('so-skills'));
+
+  const eduOut = document.getElementById('so-education');
+  eduOut.innerHTML = '';
+  educationEntries().forEach(e=>{
+    const div = document.createElement('div');
+    div.className = 'soc-acad-entry';
+    div.innerHTML = `
+      <div class="soc-acad-dates">${escapeHtml(e.dates)}</div>
+      <div class="soc-acad-course">${escapeHtml(e.degree)}</div>
+      <div class="soc-acad-school">${escapeHtml(e.school)}</div>
+    `;
+    eduOut.appendChild(div);
+  });
+
+  const weOut = document.getElementById('so-workexp');
+  weOut.innerHTML = '';
+  workExpEntries().forEach(w=>{
+    const div = document.createElement('div');
+    div.className = 'soc-career-entry';
+    div.innerHTML = `
+      <div class="soc-career-dates">${escapeHtml(w.dates)}</div>
+      <div class="soc-career-body">
+        <div class="soc-career-title">${escapeHtml(w.position)}${w.company ? ' — ' + escapeHtml(w.company) : ''}</div>
+        <ul class="soc-bullets">${bulletsHtml(w.desc)}</ul>
+      </div>
+    `;
+    weOut.appendChild(div);
+  });
+}
+
+/* ---------- TEMPLATE 6: Corporate Blue ---------- */
+function renderCorporate(){
+  document.getElementById('co-name').textContent = val('f-name') || 'Your Name';
+  document.getElementById('co-photo-wrap').innerHTML = photoHtml('square');
+  document.getElementById('co-location').textContent = val('f-location');
+  document.getElementById('co-phone').textContent = val('f-phone');
+  document.getElementById('co-email').textContent = val('f-email');
+  document.getElementById('co-profile').textContent = val('f-profile');
+
+  fillListInto('certifications-container', document.getElementById('co-certifications'));
+  fillListInto('skills-container', document.getElementById('co-skills'));
+
+  const eduOut = document.getElementById('co-education');
+  eduOut.innerHTML = '';
+  educationEntries().forEach(e=>{
+    const div = document.createElement('div');
+    div.className = 'corp-edu-entry';
+    div.innerHTML = `
+      <div class="corp-edu-degree">${escapeHtml(e.degree)}</div>
+      <div class="corp-edu-school">${escapeHtml(e.school)}${e.location ? ', ' + escapeHtml(e.location) : ''}</div>
+    `;
+    eduOut.appendChild(div);
+  });
+
+  const weOut = document.getElementById('co-workexp');
+  weOut.innerHTML = '';
+  workExpEntries().forEach(w=>{
+    const div = document.createElement('div');
+    div.className = 'corp-we-entry';
+    div.innerHTML = `
+      <div class="corp-we-dates">${escapeHtml(w.dates)}</div>
+      <div class="corp-we-title">${escapeHtml(w.position)}<span class="corp-we-company">, ${escapeHtml(w.company)}</span>${w.location ? ', ' + escapeHtml(w.location) : ''}</div>
+      <ul class="corp-bullets">${bulletsHtml(w.desc)}</ul>
+    `;
+    weOut.appendChild(div);
+  });
+}
+
+/* ---------- TEMPLATE 7: Bold Angle ---------- */
+function renderBold(){
+  document.getElementById('bo-name').textContent = val('f-name') || 'Your Name';
+  document.getElementById('bo-title').textContent = val('f-title') || 'Your Title';
+  document.getElementById('bo-photo-wrap').innerHTML = photoHtml('circle');
+  document.getElementById('bo-email').textContent = val('f-email');
+  document.getElementById('bo-phone').textContent = val('f-phone');
+  document.getElementById('bo-location').textContent = val('f-location');
+  document.getElementById('bo-profile').textContent = val('f-profile');
+
+  fillListInto('skills-container', document.getElementById('bo-skills'));
+
+  const eduOut = document.getElementById('bo-education');
+  eduOut.innerHTML = '';
+  educationEntries().forEach(e=>{
+    const div = document.createElement('div');
+    div.className = 'bld-edu-entry';
+    div.innerHTML = `
+      <div class="bld-edu-degree">${escapeHtml(e.degree)}</div>
+      <div class="bld-edu-school">${escapeHtml(e.school)}</div>
+      <div class="bld-edu-dates">${escapeHtml(e.dates)}</div>
+    `;
+    eduOut.appendChild(div);
+  });
+
+  const weOut = document.getElementById('bo-workexp');
+  weOut.innerHTML = '';
+  workExpEntries().forEach(w=>{
+    const div = document.createElement('div');
+    div.className = 'bld-we-entry';
+    div.innerHTML = `
+      <div class="bld-we-title">${escapeHtml(w.position)}${w.company ? ', ' + escapeHtml(w.company) : ''}</div>
+      <div class="bld-we-dates">${escapeHtml(w.dates)}</div>
+      <ul class="bld-bullets">${bulletsHtml(w.desc)}</ul>
     `;
     weOut.appendChild(div);
   });
