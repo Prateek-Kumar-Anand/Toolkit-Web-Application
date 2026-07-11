@@ -3,8 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Toolkit — Resume, PDF, Excel, Zip, Image & QR</title>
-<meta name="description" content="Build a formatted resume, edit and compress PDFs, clean Excel files, unzip archives, edit images, and generate QR codes — all in your browser, no backend required.">
+<script>
+/* Set the theme before first paint so there's no light-mode flash for
+   people who have dark mode saved or preferred at the OS level. */
+(function(){
+  try{
+    var saved = localStorage.getItem('toolkitTheme');
+    var theme = saved || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+  } catch(e){}
+})();
+</script>
+<title>Student Toolkit — Resume, PDF, Excel, Zip, Image, File Converter & QR</title>
+<meta name="description" content="Build a formatted resume, edit and compress PDFs, clean Excel files, unzip archives, edit images, convert file formats, and generate QR codes — all in your browser, no backend required.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
@@ -34,15 +45,18 @@
     <button class="tab-btn" data-view="image" onclick="showView('image')">🖼 Image Editing</button>
     <button class="tab-btn" data-view="compress" onclick="showView('compress')">🗃 PDF Compressor</button>
     <button class="tab-btn" data-view="qr" onclick="showView('qr')">🔳 QR Code</button>
+    <button class="tab-btn" data-view="convert" onclick="showView('convert')">🔄 File Converter</button>
   </div>
+  <button class="theme-toggle js-theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
 </div>
 
 <!-- ================= HOME SCREEN — THE 3 MAIN BUTTONS ================= -->
 <div class="view active" id="view-home">
+  <button class="home-theme-toggle js-theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
   <div class="hero">
     <div class="hero-eyebrow">Free & runs entirely in your browser</div>
     <h1>Student Toolkit</h1>
-    <p class="hero-sub">Seven tools college students actually need — build a resume, edit or compress a PDF, clean up a spreadsheet, unzip an archive, touch up a photo, and generate a QR code. No sign-up, no uploads to a server, nothing to install.</p>
+    <p class="hero-sub">Eight tools college students actually need — build a resume, edit or compress a PDF, clean up a spreadsheet, unzip an archive, touch up a photo, convert files between formats, and generate a QR code. No sign-up, no uploads to a server, nothing to install.</p>
   </div>
 
   <div class="card-grid">
@@ -93,6 +107,13 @@
       <div class="tool-name">QR Code</div>
       <div class="tool-desc">Turn any link or text into a scannable QR code, or scan an existing one to read what it links to.</div>
       <div class="tool-cta">Generate or scan →</div>
+    </button>
+
+    <button class="tool-card" onclick="showView('convert')">
+      <div class="tool-icon">🔄</div>
+      <div class="tool-name">File Converter</div>
+      <div class="tool-desc">Convert images between PNG/JPEG/WEBP, audio to WAV, or data files between CSV, TSV, JSON & XLSX.</div>
+      <div class="tool-cta">Convert a file →</div>
     </button>
   </div>
 
@@ -908,6 +929,88 @@
   </div>
 </div>
 
+<!-- ================= TOOL 8: FILE-TYPE CONVERTER ================= -->
+<div class="view" id="view-convert">
+  <div class="pdf-wrap">
+    <h1 class="tool-heading">File-Type Converter</h1>
+    <p class="tool-subheading">Open an image, audio clip, or data file and convert it to another format — decoded and re-encoded entirely in your browser, nothing uploaded anywhere.</p>
+
+    <div class="pdf-toolbar">
+      <div class="grp">
+        <input type="file" id="convOpenInput" style="display:none">
+        <button class="file-btn" onclick="document.getElementById('convOpenInput').click()">Open File</button>
+      </div>
+    </div>
+    <div class="pdf-status" id="convStatus"></div>
+
+    <div id="convEmptyState" class="pdf-empty">
+      No file loaded yet. Click <strong>Open File</strong> to get started.<br>
+      Supported: images (→ PNG / JPEG / WEBP), audio (→ WAV), and data files — CSV, TSV, JSON, XLSX/XLS (→ any of the four).
+    </div>
+
+    <!-- IMAGE CONVERSION -->
+    <div id="convImagePanel" style="display:none;">
+      <div class="img-editor-layout">
+        <div class="img-canvas-col">
+          <div class="img-canvas-wrap">
+            <img id="convImagePreview" style="display:block; max-width:100%; height:auto;" alt="Loaded image preview">
+          </div>
+        </div>
+        <div class="img-controls-col">
+          <div class="img-panel">
+            <h3>Convert Image</h3>
+            <div class="img-field">
+              <label for="convImageFormat">Convert to</label>
+              <select id="convImageFormat" class="img-select">
+                <option value="image/png">PNG</option>
+                <option value="image/jpeg">JPEG</option>
+                <option value="image/webp">WEBP</option>
+              </select>
+            </div>
+            <div class="img-slider-row" id="convImageQualityRow" style="display:none;">
+              <label>Quality <span id="convImageQualityVal">92%</span></label>
+              <input type="range" id="convImageQuality" min="0.1" max="1" step="0.05" value="0.92">
+            </div>
+            <button class="file-btn" style="margin-top:10px;" onclick="convertAndDownloadImage()">Convert & Download</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUDIO CONVERSION -->
+    <div id="convAudioPanel" style="display:none;">
+      <div class="img-panel">
+        <h3>Convert Audio</h3>
+        <p class="conv-audio-info" id="convAudioInfo"></p>
+        <button class="file-btn" id="convAudioBtn" onclick="convertAndDownloadAudio()" disabled>Convert to WAV & Download</button>
+      </div>
+    </div>
+
+    <!-- DATA FILE CONVERSION -->
+    <div id="convDataPanel" style="display:none;">
+      <div class="pdf-toolbar">
+        <div class="grp">
+          <label for="convDataFormat" style="font-size:12px;color:#555;">Convert to</label>
+          <select id="convDataFormat" class="img-select">
+            <option value="csv">CSV</option>
+            <option value="tsv">TSV</option>
+            <option value="json">JSON</option>
+            <option value="xlsx">XLSX</option>
+          </select>
+        </div>
+        <button class="file-btn" onclick="convertAndDownloadData()">Convert & Download</button>
+      </div>
+      <div class="excel-summary" id="convDataStats"></div>
+      <div class="excel-table-wrap" id="convDataPreview"></div>
+    </div>
+
+    <!-- UNSUPPORTED FILE TYPE -->
+    <div class="pdf-empty" id="convUnsupportedPanel" style="display:none;">
+      <div id="convUnsupportedMsg"></div>
+    </div>
+  </div>
+</div>
+
 <script src="js/tabs.js"></script>
 <script src="js/resume.js"></script>
 <script src="js/pdf-editor.js"></script>
@@ -916,5 +1019,7 @@
 <script src="js/image-editor.js"></script>
 <script src="js/pdf-compressor.js"></script>
 <script src="js/qr-code.js"></script>
+<script src="js/file-converter.js"></script>
+<script src="js/theme.js"></script>
 </body>
 </html>

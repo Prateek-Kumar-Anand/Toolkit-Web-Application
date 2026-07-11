@@ -686,3 +686,169 @@ input[type=file]{ font-size:12px; }
   .hero h1{ font-size:26px; }
   .tool-card{ padding:24px 18px; }
 }
+
+/* ================= FILE-TYPE CONVERTER TAB ================= */
+.conv-audio-info{ font-size:12.5px; color:#555; margin:0 0 14px; line-height:1.6; }
+
+/* ================= LIGHT / DARK THEME TOGGLE ================= */
+
+/* Extra semantic surface/text variables (light-mode defaults). Everything
+   that already reads var(--line), var(--bg), var(--ink), var(--gold) etc.
+   re-colors itself automatically once the dark overrides below redefine
+   those custom properties on <html data-theme="dark">. */
+:root{
+  --surface:#fff;
+  --surface-alt:#f0efe9;
+  --surface-alt-2:#faf9f6;
+  --text-muted:#777;
+  --text-muted-2:#555;
+  --heading:var(--teal-dark);
+}
+
+html[data-theme="dark"]{
+  --ink:#e7ede9;
+  --line:#2d3b3a;
+  --bg:#12191a;
+  --surface:#1c2626;
+  --surface-alt:#23302f;
+  --surface-alt-2:#1a2322;
+  --text-muted:#9fb0ac;
+  --text-muted-2:#c3d0cb;
+  --heading:#7fd9c4;
+}
+
+/* Headings/labels that use the brand teal as *text* — fine on the original
+   white/cream surfaces, but need a lighter tint once those surfaces go dark.
+   (Resume-preview classes like .edu-school, .proj-title, .main h3 and the
+   template-picker swatches keep their own light background regardless of
+   theme, so they're intentionally left out — see the "preserved surfaces"
+   note further down.) */
+html[data-theme="dark"] .hero h1,
+html[data-theme="dark"] .form-panel h1,
+html[data-theme="dark"] .tool-name,
+html[data-theme="dark"] .tool-heading,
+html[data-theme="dark"] .section h2,
+html[data-theme="dark"] .img-panel h3,
+html[data-theme="dark"] .excel-summary strong,
+html[data-theme="dark"] .excel-table th,
+html[data-theme="dark"] .compress-size-value,
+html[data-theme="dark"] .compress-level-title,
+html[data-theme="dark"] .file-btn.secondary,
+html[data-theme="dark"] .qr-mode-btn{
+  color:var(--heading);
+}
+
+/* Muted / secondary text scattered around the app chrome (not the resume
+   paper preview, which must stay true to its printed look). */
+html[data-theme="dark"] .tool-desc,
+html[data-theme="dark"] .hero-footnote,
+html[data-theme="dark"] .tool-subheading,
+html[data-theme="dark"] .pdf-status,
+html[data-theme="dark"] .pdf-empty,
+html[data-theme="dark"] .form-panel p.sub,
+html[data-theme="dark"] label,
+html[data-theme="dark"] .img-field label,
+html[data-theme="dark"] .img-check,
+html[data-theme="dark"] .img-slider-row label,
+html[data-theme="dark"] .img-hint,
+html[data-theme="dark"] .zip-row .zip-size,
+html[data-theme="dark"] .zip-row.is-dir,
+html[data-theme="dark"] .excel-summary,
+html[data-theme="dark"] .compress-size-label,
+html[data-theme="dark"] .compress-level-desc,
+html[data-theme="dark"] .compress-size-arrow,
+html[data-theme="dark"] .qr-scan-placeholder,
+html[data-theme="dark"] .simple-line .level-badge,
+html[data-theme="dark"] .conv-audio-info{
+  color:var(--text-muted);
+}
+
+/* Card / panel / toolbar surfaces that were hardcoded to white. */
+html[data-theme="dark"] .tool-card,
+html[data-theme="dark"] .form-panel,
+html[data-theme="dark"] .pdf-toolbar,
+html[data-theme="dark"] .pdf-empty,
+html[data-theme="dark"] .pdf-page-card,
+html[data-theme="dark"] .zip-list,
+html[data-theme="dark"] .excel-summary,
+html[data-theme="dark"] .excel-table-wrap,
+html[data-theme="dark"] .img-panel,
+html[data-theme="dark"] .compress-size-card,
+html[data-theme="dark"] .qr-mode-btn,
+html[data-theme="dark"] .qr-scan-preview-box,
+html[data-theme="dark"] .file-btn.secondary,
+html[data-theme="dark"] .img-select,
+html[data-theme="dark"] input[type=text],
+html[data-theme="dark"] input[type=email],
+html[data-theme="dark"] input[type=tel],
+html[data-theme="dark"] input[type=number],
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] .qr-color{
+  background:var(--surface);
+}
+html[data-theme="dark"] input[type=text],
+html[data-theme="dark"] input[type=email],
+html[data-theme="dark"] input[type=tel],
+html[data-theme="dark"] input[type=number],
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] .img-select,
+html[data-theme="dark"] select{
+  color:var(--ink);
+  border-color:var(--input-border, var(--line));
+}
+
+/* Slightly-off-white "hover" / "stripe" / "chip" backgrounds. */
+html[data-theme="dark"] .file-btn.secondary:hover,
+html[data-theme="dark"] .qr-mode-btn:hover,
+html[data-theme="dark"] .pdf-page-card .page-controls button,
+html[data-theme="dark"] .zip-row .zip-dl{
+  background:var(--surface-alt);
+  color:var(--ink);
+  border-color:var(--line);
+}
+html[data-theme="dark"] .pdf-page-card .page-controls button:hover{ background:var(--surface); }
+html[data-theme="dark"] .list-item,
+html[data-theme="dark"] .zip-row:hover,
+html[data-theme="dark"] .excel-table tr:nth-child(even) td{
+  background:var(--surface-alt-2);
+}
+html[data-theme="dark"] .compress-size-card.highlight,
+html[data-theme="dark"] .compress-level-opt:has(input:checked){
+  background:#33291a;
+}
+html[data-theme="dark"] .img-canvas-wrap{
+  background:
+    linear-gradient(45deg,#30302c 25%,transparent 25%),
+    linear-gradient(-45deg,#30302c 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#30302c 75%),
+    linear-gradient(-45deg,transparent 75%,#30302c 75%);
+  background-color:#232320;
+  background-size:20px 20px;
+  background-position:0 0,0 10px,10px -10px,-10px 0;
+}
+
+/* Preserved surfaces: the resume paper preview (.page-frame, .resume-tpl and
+   every min-/stu-/exec-/soc-/corp-/bld- template class), the QR code output,
+   and rendered PDF-page thumbnails intentionally keep their original light
+   look in dark mode — they're a preview of an exported file, not app chrome,
+   so they should look the same as what gets downloaded. */
+
+.theme-toggle{
+  background:none; border:1px solid rgba(255,255,255,0.25); color:#e8f0ef;
+  width:36px; height:36px; border-radius:50%; font-size:15px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; flex:0 0 auto; line-height:1;
+}
+.theme-toggle:hover{ background:rgba(255,255,255,0.08); }
+
+#view-home{ position:relative; }
+.home-theme-toggle{
+  position:absolute; top:20px; right:20px;
+  background:var(--surface); border:1px solid var(--line); color:var(--ink);
+  width:40px; height:40px; border-radius:50%; font-size:16px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; line-height:1;
+  box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+.home-theme-toggle:hover{ border-color:var(--gold); }
+@media (max-width: 480px){
+  .home-theme-toggle{ top:14px; right:14px; width:36px; height:36px; font-size:14px; }
+}

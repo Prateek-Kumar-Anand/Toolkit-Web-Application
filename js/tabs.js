@@ -1,7 +1,7 @@
 /* ============================================================
    VIEW SWITCHING
-   Eight views total: home, resume, pdf, excel, zip, image,
-   compress, qr.
+   Nine views total: home, resume, pdf, excel, zip, image,
+   compress, qr, convert.
    Home shows the big tool cards. Once inside a tool, a slim
    top bar appears with a Home link and quick tab switches.
    ============================================================ */
