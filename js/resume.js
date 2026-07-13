@@ -685,18 +685,23 @@ document.getElementById('downloadBtn').addEventListener('click', async function(
   try{
     const frameEl = document.getElementById('resume-frame');
 
-    // Re-run the fit right before capture (covers any last-keystroke edit).
-    fitResumeToOnePage();
-
     // Make sure the custom webfonts (Lora / Source Sans 3 / Dancing Script) are
-    // fully loaded before rasterizing — otherwise html2canvas can capture a
-    // fallback system font mid-swap, which is a common cause of a
-    // "broken looking" export.
+    // fully loaded BEFORE measuring/fitting the page. fitResumeToOnePage()
+    // decides its scale from the content's rendered scrollHeight, and text set
+    // in a fallback system font measures a different height than the same
+    // text once the real webfont swaps in — so fitting too early can lock in
+    // a scale that no longer matches the content a moment later, letting it
+    // overflow the fixed-size capture window in the exported PDF.
     if (document.fonts && document.fonts.ready) {
       await document.fonts.ready;
     }
     // Small extra delay to let the browser finish painting after font swap.
     await new Promise(resolve => setTimeout(resolve, 150));
+
+    // Re-run the fit now that fonts are settled (also covers any last-keystroke edit).
+    fitResumeToOnePage();
+    // Let the browser actually paint the resulting transform before we rasterize it.
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
     // Capture the fixed 794x1123 frame (not the free-floating template element).
     // Because the active template is scaled to fit inside it, this canvas is

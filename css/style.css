@@ -107,12 +107,19 @@ input[type=range], input[type=checkbox]{ accent-color:var(--teal); }
 #view-home{
   min-height:100vh;
   padding:76px 24px 48px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
   text-align:center;
   position:relative;
   overflow:hidden;
+}
+/* NOTE: display is intentionally set only here (ID + .active), not on the
+   bare #view-home rule above — an ID selector's display:flex would otherwise
+   always beat the .view{display:none} rule that hides inactive views,
+   leaving the home screen visible (and pushing/overlapping tool content)
+   even when another tab is open. */
+#view-home.active{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
 }
 /* Soft decorative glow behind the hero — purely atmospheric. */
 #view-home::before{
@@ -1005,7 +1012,6 @@ html[data-theme="dark"] .img-canvas-wrap{
 }
 .theme-toggle:hover{ background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.36); transform:rotate(14deg); }
 
-#view-home{ position:relative; }
 .home-theme-toggle{
   position:absolute; top:22px; right:22px; z-index:2;
   background:var(--surface); border:1px solid var(--line); color:var(--ink);
