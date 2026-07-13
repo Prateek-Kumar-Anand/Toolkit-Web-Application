@@ -14,8 +14,8 @@
   } catch(e){}
 })();
 </script>
-<title>Student Toolkit — Resume, PDF, Excel, Zip, Image, File Converter & QR</title>
-<meta name="description" content="Build a formatted resume, edit and compress PDFs, clean Excel files, unzip archives, edit images, convert file formats, and generate QR codes — all in your browser, no backend required.">
+<title>Student Toolkit — Resume, PDF, Excel, Zip, Image, File Converter, QR & Share</title>
+<meta name="description" content="Build a formatted resume, edit and compress PDFs, clean Excel files, unzip archives, edit images, convert file formats, generate QR codes, and share any file instantly — all in your browser, no backend required.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
@@ -48,6 +48,7 @@
     <button class="tab-btn" data-view="qr" onclick="showView('qr')">🔳 QR Code</button>
     <button class="tab-btn" data-view="convert" onclick="showView('convert')">🔄 File Converter</button>
     <button class="tab-btn" data-view="ocr" onclick="showView('ocr')">🔎 Text → Editable PDF</button>
+    <button class="tab-btn" data-view="share" onclick="showView('share')">📤 Share File</button>
   </div>
   <button class="theme-toggle js-theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
 </div>
@@ -58,7 +59,7 @@
   <div class="hero">
     <div class="hero-eyebrow">Free & runs entirely in your browser</div>
     <h1>Student Toolkit</h1>
-    <p class="hero-sub">Nine tools college students actually need — build a resume, edit or compress a PDF, clean up a spreadsheet, unzip an archive, touch up a photo, convert files between formats, generate a QR code, and pull editable text out of a photo. No sign-up, no uploads to a server, nothing to install.</p>
+    <p class="hero-sub">Ten tools college students actually need — build a resume, edit or compress a PDF, clean up a spreadsheet, unzip an archive, touch up a photo, convert files between formats, generate a QR code, pull editable text out of a photo, and share any file straight from your device. No sign-up, no uploads to a server, nothing to install.</p>
   </div>
 
   <div class="card-grid">
@@ -123,6 +124,13 @@
       <div class="tool-name">Text → Editable PDF</div>
       <div class="tool-desc">Snap or upload a photo of text — OCR reads it and turns it into a real, editable/selectable PDF.</div>
       <div class="tool-cta">Scan a photo →</div>
+    </button>
+
+    <button class="tool-card" onclick="showView('share')">
+      <div class="tool-icon">📤</div>
+      <div class="tool-name">Share File</div>
+      <div class="tool-desc">Pick a PDF or any file and send it straight through your device's native share sheet — fast, and nothing ever touches a server.</div>
+      <div class="tool-cta">Share a file →</div>
     </button>
   </div>
 
@@ -1056,6 +1064,37 @@
   </div>
 </div>
 
+<!-- ================= TOOL 10: SHARE FILE ================= -->
+<div class="view" id="view-share">
+  <div class="pdf-wrap">
+    <h1 class="tool-heading">Share File</h1>
+    <p class="tool-subheading">Pick a PDF, photo, video, or any other file and hand it straight to your device's native share sheet — AirDrop, Bluetooth, Messages, Mail, WhatsApp, whatever you've got. Photos and videos get an instant preview so you can confirm what you're sending, PDFs are checked for corruption before you send them, and if native sharing isn't available it always falls back to a clean download instead — nothing is ever uploaded to a server.</p>
+
+    <div class="pdf-toolbar">
+      <div class="grp">
+        <input type="file" id="shareFileInput" multiple style="display:none">
+        <button class="file-btn" onclick="document.getElementById('shareFileInput').click()">Choose File(s)</button>
+      </div>
+      <div class="grp">
+        <button class="file-btn secondary" id="shareClearBtn" disabled onclick="clearShareFiles()">Clear</button>
+      </div>
+      <button id="shareBtn" disabled onclick="shareSelectedFiles()">📤 Share</button>
+    </div>
+    <div class="pdf-status" id="shareStatus"></div>
+
+    <div class="share-dropzone" id="shareDropzone">
+      <div id="shareEmptyState" class="pdf-empty">
+        <div style="font-size:34px;margin-bottom:10px;">📤</div>
+        Drag &amp; drop a file here, or click <strong>Choose File(s)</strong> above.<br>
+        Any file type works — PDFs, photos, videos, docs, zips, anything — and you can pick more than one at once.
+      </div>
+      <div class="zip-list" id="shareList" style="display:none;"></div>
+    </div>
+
+    <p class="share-fallback-note" id="shareFallbackNote" style="display:none;"></p>
+  </div>
+</div>
+
 <script src="js/tabs.js"></script>
 <script src="js/resume.js"></script>
 <script src="js/pdf-editor.js"></script>
@@ -1066,6 +1105,7 @@
 <script src="js/qr-code.js"></script>
 <script src="js/file-converter.js"></script>
 <script src="js/ocr-pdf.js"></script>
+<script src="js/share-file.js"></script>
 <script src="js/theme.js"></script>
 </body>
 </html>
