@@ -31,6 +31,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
 
@@ -46,6 +47,7 @@
     <button class="tab-btn" data-view="compress" onclick="showView('compress')">🗃 PDF Compressor</button>
     <button class="tab-btn" data-view="qr" onclick="showView('qr')">🔳 QR Code</button>
     <button class="tab-btn" data-view="convert" onclick="showView('convert')">🔄 File Converter</button>
+    <button class="tab-btn" data-view="ocr" onclick="showView('ocr')">🔎 Text → Editable PDF</button>
   </div>
   <button class="theme-toggle js-theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
 </div>
@@ -56,7 +58,7 @@
   <div class="hero">
     <div class="hero-eyebrow">Free & runs entirely in your browser</div>
     <h1>Student Toolkit</h1>
-    <p class="hero-sub">Eight tools college students actually need — build a resume, edit or compress a PDF, clean up a spreadsheet, unzip an archive, touch up a photo, convert files between formats, and generate a QR code. No sign-up, no uploads to a server, nothing to install.</p>
+    <p class="hero-sub">Nine tools college students actually need — build a resume, edit or compress a PDF, clean up a spreadsheet, unzip an archive, touch up a photo, convert files between formats, generate a QR code, and pull editable text out of a photo. No sign-up, no uploads to a server, nothing to install.</p>
   </div>
 
   <div class="card-grid">
@@ -114,6 +116,13 @@
       <div class="tool-name">File Converter</div>
       <div class="tool-desc">Convert images between PNG/JPEG/WEBP, audio to WAV, or data files between CSV, TSV, JSON & XLSX.</div>
       <div class="tool-cta">Convert a file →</div>
+    </button>
+
+    <button class="tool-card" onclick="showView('ocr')">
+      <div class="tool-icon">🔎</div>
+      <div class="tool-name">Text → Editable PDF</div>
+      <div class="tool-desc">Snap or upload a photo of text — OCR reads it and turns it into a real, editable/selectable PDF.</div>
+      <div class="tool-cta">Scan a photo →</div>
     </button>
   </div>
 
@@ -1011,6 +1020,42 @@
   </div>
 </div>
 
+<!-- ================= TOOL 9: TEXT -> EDITABLE PDF (OCR) ================= -->
+<div class="view" id="view-ocr">
+  <div class="pdf-wrap">
+    <h1 class="tool-heading">Text → Editable PDF</h1>
+    <p class="tool-subheading">Upload a photo of text (notes, a printed page, a whiteboard) and OCR reads it, right in your browser. Check the recognized text for mistakes, fix anything it got wrong, then export it as a real PDF with selectable, editable text — not just a picture.</p>
+
+    <div class="pdf-toolbar">
+      <div class="grp">
+        <input type="file" id="ocrOpenInput" accept="image/*" multiple style="display:none">
+        <button class="file-btn" onclick="document.getElementById('ocrOpenInput').click()">Add Photo(s)</button>
+      </div>
+      <div class="grp">
+        <label for="ocrLangSelect" style="font-size:12px;color:#555;">Language</label>
+        <select id="ocrLangSelect" class="img-select">
+          <option value="eng">English</option>
+          <option value="hin">Hindi</option>
+          <option value="eng+hin">English + Hindi</option>
+          <option value="fra">French</option>
+          <option value="spa">Spanish</option>
+          <option value="deu">German</option>
+        </select>
+      </div>
+      <button class="file-btn" id="ocrRunBtn" disabled onclick="runOcrOnAllPages()">Run OCR</button>
+      <button id="ocrGenerateBtn" disabled onclick="generateOcrPdf()">Generate &amp; Download PDF</button>
+      <button class="file-btn secondary" id="ocrClearBtn" disabled onclick="clearOcrPages()">Clear All</button>
+    </div>
+    <div class="pdf-status" id="ocrStatus"></div>
+
+    <div id="ocrEmptyState" class="pdf-empty">
+      No photos added yet. Click <strong>Add Photo(s)</strong> to get started — you can add more than one to build a multi-page PDF.
+    </div>
+
+    <div class="ocr-page-list" id="ocrPageList"></div>
+  </div>
+</div>
+
 <script src="js/tabs.js"></script>
 <script src="js/resume.js"></script>
 <script src="js/pdf-editor.js"></script>
@@ -1020,6 +1065,7 @@
 <script src="js/pdf-compressor.js"></script>
 <script src="js/qr-code.js"></script>
 <script src="js/file-converter.js"></script>
+<script src="js/ocr-pdf.js"></script>
 <script src="js/theme.js"></script>
 </body>
 </html>

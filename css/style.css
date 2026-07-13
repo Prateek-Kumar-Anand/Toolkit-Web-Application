@@ -345,8 +345,13 @@ textarea{min-height:60px;}
 }
 #downloadBtn:hover{ filter:brightness(1.03); transform:translateY(-1px); box-shadow:0 8px 22px rgba(201,162,75,0.45); }
 #downloadBtn:disabled{opacity:.6; cursor:wait; transform:none;}
-.preview-panel{ padding:36px; display:flex; flex-direction:column; align-items:center; overflow:auto; max-height:calc(100vh - var(--topbar-h)); }
-.page-shadow{ box-shadow:0 18px 48px rgba(20,35,34,0.22), 0 4px 14px rgba(20,35,34,0.12); margin-bottom:12px; flex:0 0 auto; border-radius:2px; }
+.preview-panel{ padding:36px; display:flex; flex-direction:column; align-items:center; overflow:auto; overflow-x:auto; max-height:calc(100vh - var(--topbar-h)); }
+/* Centering via the parent's align-items:center clips left-side overflow and
+   makes it unreachable by scrolling once the preview panel is narrower than
+   the fixed-size page (a well-known flexbox quirk). Auto margins on the item
+   itself center it the same way when there's room, but degrade to a fully
+   scrollable left+right overflow instead of clipping the left side. */
+.page-shadow{ box-shadow:0 18px 48px rgba(20,35,34,0.22), 0 4px 14px rgba(20,35,34,0.12); margin:0 auto 12px; flex:0 0 auto; border-radius:2px; }
 /* Fixed A4-ratio window (794x1123px = 210x297mm @96dpi). Content taller than
    this is auto-scaled down (see fitResumeToOnePage in resume.js) so the
    live preview - and the exported PDF - is always exactly one page. */
@@ -605,6 +610,14 @@ input[type=file]{ font-size:12px; }
 }
 #pdfDownloadBtn:hover{ filter:brightness(1.03); transform:translateY(-1px); box-shadow:0 6px 16px rgba(201,162,75,0.4); }
 #pdfDownloadBtn:disabled{ opacity:.5; cursor:not-allowed; transform:none; box-shadow:none; }
+#ocrGenerateBtn{
+  background:linear-gradient(135deg, var(--gold-light), var(--gold) 55%, var(--gold-dark)); color:#25231a; border:none; padding:9px 18px;
+  border-radius:var(--radius-sm); font-size:13px; font-weight:700; cursor:pointer;
+  box-shadow:0 4px 12px rgba(201,162,75,0.3);
+  transition:transform .18s var(--ease), box-shadow .18s var(--ease), filter .18s var(--ease);
+}
+#ocrGenerateBtn:hover{ filter:brightness(1.03); transform:translateY(-1px); box-shadow:0 6px 16px rgba(201,162,75,0.4); }
+#ocrGenerateBtn:disabled{ opacity:.5; cursor:not-allowed; transform:none; box-shadow:none; }
 .pdf-empty{
   text-align:center; color:#888; padding:64px 20px; border:2px dashed var(--line);
   border-radius:var(--radius-lg); background:#fff;
@@ -854,6 +867,54 @@ input[type=file]{ font-size:12px; }
 /* ================= FILE-TYPE CONVERTER TAB ================= */
 .conv-audio-info{ font-size:12.5px; color:#555; margin:0 0 14px; line-height:1.6; }
 
+/* ================= OCR -> EDITABLE PDF TAB ================= */
+.ocr-page-list{ display:flex; flex-direction:column; gap:16px; }
+.ocr-page-card{
+  background:#fff; border:1px solid var(--line); border-radius:var(--radius-md);
+  padding:16px; display:grid; grid-template-columns:160px 1fr; gap:16px;
+  box-shadow:var(--shadow-sm);
+}
+.ocr-page-card .ocr-thumb-box{
+  width:100%; aspect-ratio:3/4; overflow:hidden; border:1px solid #eee; border-radius:6px;
+  background:#fafafa; display:flex; align-items:center; justify-content:center;
+}
+.ocr-page-card .ocr-thumb-box img{ max-width:100%; max-height:100%; object-fit:contain; }
+.ocr-page-meta{ display:flex; justify-content:space-between; align-items:center; margin-top:8px; gap:6px; }
+.ocr-page-meta .ocr-page-num{ font-size:12px; color:#888; }
+.ocr-page-meta .ocr-remove-btn{
+  background:none; border:1px solid #d7d3c8; border-radius:5px; color:#b33;
+  cursor:pointer; font-size:11px; padding:3px 7px;
+}
+.ocr-page-meta .ocr-remove-btn:hover{ background:#fbeaea; }
+.ocr-page-body{ display:flex; flex-direction:column; min-width:0; }
+.ocr-page-status{ font-size:12px; color:#777; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+.ocr-page-status .ocr-badge{
+  font-size:10.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+  padding:2px 8px; border-radius:20px; background:#eee; color:#777;
+}
+.ocr-page-status .ocr-badge.pending{ background:#eee; color:#888; }
+.ocr-page-status .ocr-badge.processing{ background:#fff3d6; color:#8a6a12; }
+.ocr-page-status .ocr-badge.done{ background:#e2f3ec; color:var(--teal-dark); }
+.ocr-page-status .ocr-badge.error{ background:#fbe4e4; color:#a33; }
+.ocr-progress-track{
+  flex:1; height:6px; border-radius:4px; background:#ece9e1; overflow:hidden; min-width:60px;
+}
+.ocr-progress-fill{
+  height:100%; width:0%; background:linear-gradient(90deg, var(--teal-light), var(--teal));
+  transition:width .2s var(--ease);
+}
+.ocr-page-textarea{
+  width:100%; flex:1; min-height:160px; resize:vertical; padding:10px 12px;
+  border:1px solid #d7d3c8; border-radius:var(--radius-sm); font-size:13px; line-height:1.5;
+  font-family:inherit; transition:border-color .18s var(--ease), box-shadow .18s var(--ease);
+}
+.ocr-page-textarea:focus{ outline:none; border-color:var(--teal); box-shadow:0 0 0 3px rgba(30,61,63,0.12); }
+.ocr-page-textarea::placeholder{ color:#aaa; }
+@media (max-width:640px){
+  .ocr-page-card{ grid-template-columns:1fr; }
+  .ocr-page-card .ocr-thumb-box{ max-width:160px; }
+}
+
 /* ================= LIGHT / DARK THEME TOGGLE ================= */
 
 /* Extra semantic surface/text variables (light-mode defaults). Everything
@@ -901,6 +962,9 @@ html[data-theme="dark"] .file-btn.secondary,
 html[data-theme="dark"] .qr-mode-btn{
   color:var(--heading);
 }
+html[data-theme="dark"] .ocr-page-status .ocr-badge.done{
+  color:var(--heading);
+}
 
 /* Muted / secondary text scattered around the app chrome (not the resume
    paper preview, which must stay true to its printed look). */
@@ -923,7 +987,9 @@ html[data-theme="dark"] .compress-level-desc,
 html[data-theme="dark"] .compress-size-arrow,
 html[data-theme="dark"] .qr-scan-placeholder,
 html[data-theme="dark"] .simple-line .level-badge,
-html[data-theme="dark"] .conv-audio-info{
+html[data-theme="dark"] .conv-audio-info,
+html[data-theme="dark"] .ocr-page-meta .ocr-page-num,
+html[data-theme="dark"] .ocr-page-status{
   color:var(--text-muted);
 }
 
@@ -940,6 +1006,7 @@ html[data-theme="dark"] .form-panel,
 html[data-theme="dark"] .pdf-toolbar,
 html[data-theme="dark"] .pdf-empty,
 html[data-theme="dark"] .pdf-page-card,
+html[data-theme="dark"] .ocr-page-card,
 html[data-theme="dark"] .zip-list,
 html[data-theme="dark"] .excel-summary,
 html[data-theme="dark"] .excel-table-wrap,

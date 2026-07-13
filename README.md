@@ -2,9 +2,9 @@
 
 # 🎓 Student Toolkit
 
-**Seven everyday tools, one page, zero servers.**
+**Nine everyday tools, one page, zero servers.**
 
-Build a résumé · Edit &amp; compress PDFs · Clean a spreadsheet · Unzip an archive · Touch up a photo · Generate a QR code
+Build a résumé · Edit &amp; compress PDFs · Clean a spreadsheet · Unzip an archive · Touch up a photo · Convert files · Generate a QR code · Turn a photo into an editable PDF
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-c9a24b.svg)](LICENSE)
 ![Backend](https://img.shields.io/badge/backend-none-1e3d3f.svg)
@@ -17,9 +17,9 @@ Build a résumé · Edit &amp; compress PDFs · Clean a spreadsheet · Unzip an 
 
 ## Overview
 
-**Student Toolkit** is a single HTML page that quietly does the job of seven different apps. Everything — every PDF page you rotate, every cell you clean, every photo you crop — is processed **locally in your browser**. Nothing is uploaded, nothing is stored on a server, and there's nothing to install. Open `index.html` and you're already using it.
+**Student Toolkit** is a single HTML page that quietly does the job of nine different apps. Everything — every PDF page you rotate, every cell you clean, every photo you crop, every word an OCR engine reads off a photo — is processed **locally in your browser**. Nothing is uploaded, nothing is stored on a server, and there's nothing to install. Open `index.html` and you're already using it.
 
-It opens on a home screen of large, clearly-labeled tool cards rather than a crowded menu of tabs. Pick a tool, and a slim top bar appears so you can jump between the other six without ever losing your place.
+It opens on a home screen of large, clearly-labeled tool cards rather than a crowded menu of tabs. Pick a tool, and a slim top bar appears so you can jump between the other eight without ever losing your place.
 
 |  | Tool | What it does |
 |---|---|---|
@@ -30,6 +30,8 @@ It opens on a home screen of large, clearly-labeled tool cards rather than a cro
 | 🖼 | **Image Editor** | Crop, resize, rotate/flip, adjust brightness/contrast/saturation, filter |
 | 🗃 | **PDF Compressor** | Shrink a PDF's file size with an adjustable quality/size trade-off |
 | 🔳 | **QR Code Tool** | Generate a styled QR code, or scan one via upload or live camera |
+| 🔄 | **File Converter** | Convert images, audio, and data files between common formats |
+| 🔎 | **Text → Editable PDF** | OCR a photo of text and export a real, selectable/editable PDF |
 
 ---
 
@@ -52,13 +54,13 @@ It opens on a home screen of large, clearly-labeled tool cards rather than a cro
 
 ### 📄 CV Creation
 
-A form-based resume builder with a live, styled preview — a teal sidebar (contact, skills, languages, research focus) beside a main column (profile, education, certifications, projects).
+A form-based resume builder with a live, styled preview — a teal sidebar (contact, skills, languages, research focus) beside a main column (profile, education, certifications, projects). Seven templates are available, each adapting the form to show only the fields that template uses.
 
 - Add or remove entries on the fly for skills, languages, certifications, education, and projects
 - The preview sits inside a fixed A4 frame and **always fits exactly one page** — long content is scaled down automatically rather than spilling onto a second page
 - **Get CV** exports that exact same frame to PDF, pixel-for-pixel
 
-**Using it:** fill in the fields on the left, watch the preview update on the right (a small note appears if it had to auto-shrink to fit), then click **Get CV**.
+**Using it:** pick a template, fill in the fields on the left, watch the preview update on the right (a small note appears if it had to auto-shrink to fit), then click **Get CV**.
 
 ### 🛠 PDF Editing
 
@@ -70,7 +72,7 @@ Open any PDF and see every page as a thumbnail you can act on directly.
 - Per-page checkbox to include/exclude from the final export — a quick way to extract a subset of pages
 - Optional diagonal **watermark** stamped across every page on export
 
-> This is *structural* editing — rotate, delete, reorder, merge, watermark, insert. It doesn't rewrite existing text inside a PDF; that needs OCR/layout reconstruction, which is out of scope for a client-side tool.
+> This is *structural* editing — rotate, delete, reorder, merge, watermark, insert. It doesn't rewrite text that's already baked into a PDF's pages. If what you actually have is a **photo or scan** and you want its words out as editable text, that's what the **Text → Editable PDF** tool below is for.
 
 **Using it:** **Open PDF** → adjust pages with the `←` `→` `⟳` `✕` controls and checkboxes → optionally **Merge Another PDF** or **Add Image** → optionally set a watermark → **Download Edited PDF**.
 
@@ -138,6 +140,32 @@ Two modes in one tab: **Generate** and **Scan**.
 
 **Using it:** switch between **🔳 Generate** and **📷 Scan** at the top of the tool. To generate, type your content, tweak the look, and download. To scan, upload an image or start the camera — the decoded content appears automatically.
 
+### 🔄 File Converter
+
+Open almost anything and convert it to a more useful format, scoped honestly to what a browser can do without a server:
+
+- **Images** — any format the browser can display (PNG, JPEG, WEBP, GIF, BMP, SVG…) → PNG, JPEG, or WEBP, via `<canvas>`, with a quality slider for lossy formats
+- **Audio** — any format the browser can decode (MP3, WAV, OGG, M4A, AAC…) → WAV (uncompressed PCM), via the Web Audio API
+- **Data files** — CSV, TSV, JSON, XLSX/XLS → any of those four, reusing the same SheetJS engine as the Excel Cleaner
+- Anything outside those three categories (video, DOCX, archives, etc.) shows a clear "not supported here" message rather than pretending to convert it
+
+**Using it:** **Open File** → the tool detects the category automatically and shows the right panel → pick a target format (and quality, if relevant) → **Convert & Download**.
+
+### 🔎 Text → Editable PDF
+
+Point it at a photo of text — handwritten notes, a printed page, a whiteboard — and get real, selectable text out the other end, not just a picture of it.
+
+- OCR runs **entirely client-side** via [Tesseract.js](https://tesseract.projectnaptha.com/) (WebAssembly) — the photo never leaves your browser
+- Add multiple photos to build a multi-page document
+- Choose a recognition language: English, Hindi, English + Hindi, French, Spanish, or German
+- A progress bar and status badge track each photo through **Pending → Processing → Done**
+- The recognized text lands in an editable text box per page — fix anything OCR got wrong (or just type/paste your own text) before exporting
+- **Generate & Download PDF** builds a real PDF with [jsPDF](https://github.com/parallax/jsPDF) out of actual text objects — selectable, searchable, and editable in any PDF editor, with automatic line wrapping and page breaks for longer text
+
+> This is the opposite trade-off from the PDF Compressor: that tool turns *pages into images* to shrink them; this tool turns *an image into real text*.
+
+**Using it:** **Add Photo(s)** → pick a language → **Run OCR** → review/correct the text for each page → **Generate & Download PDF**.
+
 ---
 
 ## Design
@@ -159,7 +187,8 @@ Pure static frontend — no framework, no bundler, no backend:
 | Zip read/write | [JSZip](https://stuk.github.io/jszip/) |
 | QR code generation | [qrcodejs](https://davidshimjs.github.io/qrcodejs/) |
 | QR code scanning | [jsQR](https://github.com/cozmo/jsQR) |
-| Image editing | Native Canvas API — no library needed |
+| OCR (photo → text) | [Tesseract.js](https://tesseract.projectnaptha.com/) |
+| Image editing & audio decoding | Native Canvas API + Web Audio API — no library needed |
 | Fonts | Google Fonts (Lora + Source Sans 3) |
 
 All libraries load from CDN in `index.html` — nothing to install.
@@ -170,19 +199,21 @@ All libraries load from CDN in `index.html` — nothing to install.
 
 ```
 toolkit/
-├── index.html              # Main HTML shell — home screen + all 7 tool views
+├── index.html              # Main HTML shell — home screen + all 9 tool views
 ├── css/
 │   └── style.css           # All styling: theme, layout, and every tool's UI
 ├── js/
 │   ├── tabs.js              # View switching + top bar behavior
 │   ├── resume.js            # CV Creation (incl. one-page auto-fit)
 │   ├── pdf-editor.js        # PDF Editing
-│   ├── excel-cleaner.js      # Excel Cleaner
-│   ├── zip-tool.js           # .zip Operation
-│   ├── image-editor.js       # Image Editor
-│   ├── pdf-compressor.js     # PDF Compressor
-│   ├── qr-code.js            # QR Code Tool (generate + scan)
-│   └── file-converter.js     # Standalone format-conversion module — not yet wired into index.html
+│   ├── excel-cleaner.js     # Excel Cleaner
+│   ├── zip-tool.js          # .zip Operation
+│   ├── image-editor.js      # Image Editor
+│   ├── pdf-compressor.js    # PDF Compressor
+│   ├── qr-code.js           # QR Code Tool (generate + scan)
+│   ├── file-converter.js    # File Converter (images, audio, data files)
+│   ├── ocr-pdf.js           # Text → Editable PDF (OCR)
+│   └── theme.js             # Light/dark theme toggle
 ├── LICENSE
 └── README.md
 ```
@@ -213,6 +244,8 @@ python3 -m http.server 8000
 npx serve .
 ```
 Then visit `http://localhost:8000`.
+
+> All CDN-hosted libraries — including the OCR engine's language data — are fetched over the network the first time each tool is used, so an internet connection is required at least once per tool, even though no file you open or create is ever sent anywhere.
 
 ---
 
@@ -250,18 +283,21 @@ Every push to `main` redeploys automatically.
 - Very long resume content is auto-shrunk to fit one page; extremely long content can end up quite small
 - The .zip tool reads standard, non-encrypted archives — password-protected zips aren't supported
 - PDF Compressor makes pages image-based, so compressed output loses selectable/searchable text
-- `file-converter.js` exists in the repo but isn't currently linked from `index.html`
-- No persistence between sessions — refreshing clears the resume form and any loaded PDF, spreadsheet, archive, or image
+- Audio conversion only targets WAV — true lossy re-encoding (e.g. to MP3) needs a dedicated encoder library that isn't included
+- OCR accuracy depends on photo quality — clear lighting, good focus, and a fairly straight-on angle all help; the recognized text should always be reviewed before export
+- The Text → Editable PDF export preserves the *words*, not the original layout, fonts, tables, or images — it's plain reflowed text
+- No persistence between sessions — refreshing clears the resume form and any loaded PDF, spreadsheet, archive, image, or OCR pages
 
 ---
 
 ## Roadmap
 
-- [ ] Wire up the file conversion module (images, audio → WAV, and data files via the existing SheetJS integration)
 - [ ] Save/load resume form data as JSON (import/export drafts)
 - [ ] Drag-and-drop page reordering in the PDF editor
-- [ ] Multiple resume templates
+- [ ] Multiple resume templates *(seven already shipped — more on the way)*
 - [ ] Split a PDF into separate single-page downloads
+- [ ] More OCR languages, plus an option to keep the original photo as a page background behind the text
+- [ ] Optional lossy audio export (MP3) via a bundled encoder
 
 ---
 
