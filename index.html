@@ -49,6 +49,7 @@
     <button class="tab-btn" data-view="convert" onclick="showView('convert')">🔄 File Converter</button>
     <button class="tab-btn" data-view="ocr" onclick="showView('ocr')">🔎 Text → Editable PDF</button>
     <button class="tab-btn" data-view="share" onclick="showView('share')">📤 Share File</button>
+    <button class="tab-btn" data-view="epub" onclick="showView('epub')">📚 EPUB → PDF</button>
   </div>
   <button class="theme-toggle js-theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
 </div>
@@ -59,7 +60,7 @@
   <div class="hero">
     <div class="hero-eyebrow">Free & runs entirely in your browser</div>
     <h1>Student Toolkit</h1>
-    <p class="hero-sub">Ten tools college students actually need — build a resume, edit or compress a PDF, clean up a spreadsheet, unzip an archive, touch up a photo, convert files between formats, generate a QR code, pull editable text out of a photo, and share any file straight from your device. No sign-up, no uploads to a server, nothing to install.</p>
+    <p class="hero-sub">Eleven tools college students actually need — build a resume, edit or compress a PDF, clean up a spreadsheet, unzip an archive, touch up a photo, convert files between formats, generate a QR code, pull editable text out of a photo, turn an EPUB into a PDF, and share any file straight from your device. No sign-up, no uploads to a server, nothing to install.</p>
   </div>
 
   <div class="card-grid">
@@ -131,6 +132,13 @@
       <div class="tool-name">Share File</div>
       <div class="tool-desc">Pick a PDF or any file and send it straight through your device's native share sheet — fast, and nothing ever touches a server.</div>
       <div class="tool-cta">Share a file →</div>
+    </button>
+
+    <button class="tool-card" onclick="showView('epub')">
+      <div class="tool-icon">📚</div>
+      <div class="tool-name">EPUB → PDF</div>
+      <div class="tool-desc">Turn a DRM-free EPUB into a paginated PDF — download it directly, or open a print view for big, image-heavy books.</div>
+      <div class="tool-cta">Convert an EPUB →</div>
     </button>
   </div>
 
@@ -1095,6 +1103,54 @@
   </div>
 </div>
 
+<!-- ================= TOOL 11: EPUB -> PDF ================= -->
+<div class="view" id="view-epub">
+  <div class="pdf-wrap">
+    <h1 class="tool-heading">EPUB → PDF</h1>
+    <p class="tool-subheading">Pick a DRM-free .epub file and turn it into a paginated PDF, entirely in your browser — nothing is uploaded anywhere. Works with files up to 200 MB.</p>
+
+    <div class="pdf-toolbar">
+      <div class="grp">
+        <input type="file" id="epubOpenInput" accept=".epub,application/epub+zip" style="display:none">
+        <button class="file-btn" onclick="document.getElementById('epubOpenInput').click()">Open EPUB</button>
+        <button class="file-btn secondary" id="epubClearBtn" disabled onclick="clearEpub()">Clear</button>
+      </div>
+      <div class="grp">
+        <label for="epubPageSize" style="font-size:12px;color:#555;">Page size</label>
+        <select id="epubPageSize" class="img-select">
+          <option value="a4">A4</option>
+          <option value="letter">US Letter</option>
+        </select>
+      </div>
+      <div class="grp">
+        <label for="epubQuality" style="font-size:12px;color:#555;">Quality</label>
+        <select id="epubQuality" class="img-select">
+          <option value="1" selected>Fast</option>
+          <option value="1.5">Balanced</option>
+          <option value="2">High (slower)</option>
+        </select>
+      </div>
+      <button id="epubDownloadBtn" disabled onclick="convertEpubToPdf()">Download as PDF</button>
+      <button class="file-btn secondary" id="epubPrintBtn" disabled onclick="openEpubPrintView()">Open Print View</button>
+    </div>
+    <div class="pdf-status" id="epubStatus"></div>
+    <p class="epub-hint">On a phone, or for image-heavy books, use <strong>Fast</strong> quality and prefer <strong>Print View</strong> — it skips canvas rendering entirely, so it won't crash the tab.</p>
+
+    <div id="epubEmptyState" class="pdf-empty">
+      No EPUB selected yet. Click <strong>Open EPUB</strong> to get started — DRM-free .epub files only, up to 200 MB.
+    </div>
+
+    <div class="epub-file-card" id="epubFileCard" style="display:none;">
+      <div class="epub-file-meta">
+        <span class="epub-file-name" id="epubFileName"></span>
+        <span class="epub-file-size" id="epubFileSize"></span>
+      </div>
+      <div class="epub-progress-track"><div class="epub-progress-fill" id="epubProgressFill"></div></div>
+    </div>
+  </div>
+  <iframe id="epubRenderFrame" title="render surface"></iframe>
+</div>
+
 <script src="js/tabs.js"></script>
 <script src="js/resume.js"></script>
 <script src="js/pdf-editor.js"></script>
@@ -1106,6 +1162,7 @@
 <script src="js/file-converter.js"></script>
 <script src="js/ocr-pdf.js"></script>
 <script src="js/share-file.js"></script>
+<script src="js/epub-to-pdf.js"></script>
 <script src="js/theme.js"></script>
 </body>
 </html>

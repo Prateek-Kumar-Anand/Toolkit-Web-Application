@@ -955,6 +955,31 @@ input[type=file]{ font-size:12px; }
   .ocr-page-card .ocr-thumb-box{ max-width:160px; }
 }
 
+/* ================= EPUB -> PDF TAB ================= */
+#epubDownloadBtn{
+  background:linear-gradient(135deg, var(--gold-light), var(--gold) 55%, var(--gold-dark)); color:#25231a; border:none; padding:9px 18px;
+  border-radius:var(--radius-sm); font-size:13px; font-weight:700; cursor:pointer;
+  box-shadow:0 4px 12px rgba(201,162,75,0.3);
+  transition:transform .18s var(--ease), box-shadow .18s var(--ease), filter .18s var(--ease);
+}
+#epubDownloadBtn:hover{ filter:brightness(1.03); transform:translateY(-1px); box-shadow:0 6px 16px rgba(201,162,75,0.4); }
+#epubDownloadBtn:disabled{ opacity:.5; cursor:not-allowed; transform:none; box-shadow:none; }
+.epub-hint{ font-size:12px; color:#888; margin:-10px 0 18px; line-height:1.5; }
+.epub-file-card{
+  background:#fff; border:1px solid var(--line); border-radius:var(--radius-md);
+  padding:14px 16px; margin-bottom:18px; box-shadow:var(--shadow-sm);
+  display:flex; flex-direction:column; gap:10px;
+}
+.epub-file-meta{ display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:13px; }
+.epub-file-name{ font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.epub-file-size{ color:#888; flex:none; }
+.epub-progress-track{ height:6px; border-radius:4px; background:#ece9e1; overflow:hidden; }
+.epub-progress-fill{
+  height:100%; width:0%; background:linear-gradient(90deg, var(--teal-light), var(--teal));
+  transition:width .2s var(--ease);
+}
+#epubRenderFrame{ position:absolute; left:-10000px; top:0; width:800px; height:1200px; border:0; }
+
 /* ================= LIGHT / DARK THEME TOGGLE ================= */
 
 /* Extra semantic surface/text variables (light-mode defaults). Everything
@@ -1029,7 +1054,9 @@ html[data-theme="dark"] .qr-scan-placeholder,
 html[data-theme="dark"] .simple-line .level-badge,
 html[data-theme="dark"] .conv-audio-info,
 html[data-theme="dark"] .ocr-page-meta .ocr-page-num,
-html[data-theme="dark"] .ocr-page-status{
+html[data-theme="dark"] .ocr-page-status,
+html[data-theme="dark"] .epub-file-size,
+html[data-theme="dark"] .epub-hint{
   color:var(--text-muted);
 }
 
@@ -1047,6 +1074,7 @@ html[data-theme="dark"] .pdf-toolbar,
 html[data-theme="dark"] .pdf-empty,
 html[data-theme="dark"] .pdf-page-card,
 html[data-theme="dark"] .ocr-page-card,
+html[data-theme="dark"] .epub-file-card,
 html[data-theme="dark"] .zip-list,
 html[data-theme="dark"] .excel-summary,
 html[data-theme="dark"] .excel-table-wrap,
